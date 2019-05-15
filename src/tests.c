@@ -12,6 +12,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+void* memcpy(void* restrict d, void const * restrict s, size_t n)
+{
+   size_t i;
+   unsigned char *cs = (unsigned char *)s;
+   unsigned char *cd = (unsigned char *)d;
+   for (i=0; i<n; i++){cd[i] = cs[i];}
+   return d;
+}
+
+int memcmp (const void *str1, const void *str2, size_t count)
+{
+  const unsigned char *s1 = (const unsigned char*)str1;
+  const unsigned char *s2 = (const unsigned char*)str2;
+  while (count-- > 0)
+    {
+      if (*s1++ != *s2++)
+	  return s1[-1] < s2[-1] ? -1 : 1;
+    }
+  return 0;
+}
+
+void *memset(void *str, int c, size_t n) {
+    size_t i;
+    unsigned char* s = str;
+    for (i=0; i<n; i++) {
+        s[i] = (unsigned char) c;
+    }
+    return str;
+}
+
 #include <time.h>
 
 #include "secp256k1.c"
@@ -42,7 +72,7 @@ void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **pr, const BIGNUM **ps) 
 # endif
 #endif
 
-static int count = 64;
+static int count = 1;
 static secp256k1_context *ctx = NULL;
 
 static void counting_illegal_callback_fn(const char* str, void* data) {
@@ -5019,12 +5049,12 @@ void run_ecdsa_openssl(void) {
 int main(int argc, char **argv) {
     unsigned char seed16[16] = {0};
     unsigned char run32[32] = {0};
-    /* find iteration count */
+    /* find iteration count
     if (argc > 1) {
         count = strtol(argv[1], NULL, 0);
     }
 
-    /* find random seed */
+    /* find random seed
     if (argc > 2) {
         int pos = 0;
         const char* ch = argv[2];
@@ -5061,7 +5091,7 @@ int main(int argc, char **argv) {
     printf("test count = %i\n", count);
     printf("random seed = %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n", seed16[0], seed16[1], seed16[2], seed16[3], seed16[4], seed16[5], seed16[6], seed16[7], seed16[8], seed16[9], seed16[10], seed16[11], seed16[12], seed16[13], seed16[14], seed16[15]);
 
-    /* initialize */
+     initialize */
     run_context_tests();
     run_scratch_tests();
     ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);

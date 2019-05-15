@@ -12,7 +12,6 @@
 #include <stdlib.h>
 
 #include <time.h>
-
 #undef USE_ECMULT_STATIC_PRECOMPUTATION
 
 #ifndef EXHAUSTIVE_TEST_ORDER
@@ -30,6 +29,37 @@
 #include "src/modules/recovery/main_impl.h"
 #include "include/secp256k1_recovery.h"
 #endif
+
+void* memcpy(void* restrict d, void const * restrict s, size_t n)
+{
+   size_t i;
+   unsigned char *cs = (unsigned char *)s;
+   unsigned char *cd = (unsigned char *)d;
+   for (i=0; i<n; i++){cd[i] = cs[i];}
+   return d;
+}
+
+int memcmp (const void *str1, const void *str2, size_t count)
+{
+  const unsigned char *s1 = (const unsigned char*)str1;
+  const unsigned char *s2 = (const unsigned char*)str2;
+  while (count-- > 0)
+    {
+      if (*s1++ != *s2++)
+	  return s1[-1] < s2[-1] ? -1 : 1;
+    }
+  return 0;
+}
+
+void *memset(void *str, int c, size_t n) {
+    size_t i;
+    unsigned char* s = str;
+    for (i=0; i<n; i++) {
+        s[i] = (unsigned char) c;
+    }
+    return str;
+}
+
 
 /** stolen from tests.c */
 void ge_equals_ge(const secp256k1_ge *a, const secp256k1_ge *b) {
