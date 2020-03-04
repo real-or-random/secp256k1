@@ -1,6 +1,6 @@
 #!/bin/sh
 
-libtool --mode=execute valgrind --error-exitcode=1 ./valgrind_ctime_test "$@"
+./libtool --mode=execute valgrind --error-exitcode=1 ./valgrind_ctime_test "$@"
 
 case $? in
     127) # "command not found", i.e., either libtool or valgrind not installed

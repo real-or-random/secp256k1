@@ -5,7 +5,6 @@ addons:
     packages:
       - libgmp-dev
       - valgrind
-      - libtool-bin
 compiler:
   - clang
   - gcc
@@ -41,7 +40,6 @@ matrix:
             - gcc-multilib
             - libgmp-dev:i386
             - valgrind
-            - libtool-bin
             - libc6-dbg:i386
     - compiler: clang
       env: HOST=i686-linux-gnu
@@ -50,7 +48,6 @@ matrix:
           packages:
             - gcc-multilib
             - valgrind
-            - libtool-bin
             - libc6-dbg:i386
     - compiler: gcc
       env: HOST=i686-linux-gnu ENDOMORPHISM=yes
@@ -59,7 +56,6 @@ matrix:
           packages:
             - gcc-multilib
             - valgrind
-            - libtool-bin
             - libc6-dbg:i386
     - compiler: gcc
       env: HOST=i686-linux-gnu
@@ -69,7 +65,6 @@ matrix:
             - gcc-multilib
             - libgmp-dev:i386
             - valgrind
-            - libtool-bin
             - libc6-dbg:i386
     - compiler: gcc
       env:
@@ -95,7 +90,7 @@ script:
    travis_wait 30 valgrind --error-exitcode=42 ./exhaustive_tests;
    fi
  - if [ -n "$CTIMETEST" ]; then
-   libtool --mode=execute valgrind  ./valgrind_ctime_test &> valgrind_ctime_test.log;
+   ./libtool --mode=execute valgrind  ./valgrind_ctime_test &> valgrind_ctime_test.log;
    fi
 
 after_script:
