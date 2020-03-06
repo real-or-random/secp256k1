@@ -496,8 +496,6 @@ int secp256k1_ecdsa_sign(const secp256k1_context* ctx, secp256k1_ecdsa_signature
         }
         secp256k1_scalar_set_b32(&non, nonce32, &koverflow);
         koverflow |= secp256k1_scalar_is_zero(&non);
-        /* The nonce is still secret here, but it overflowing or being zero is is less likely than 1:2^255. */
-        secp256k1_declassify(ctx, &koverflow, sizeof(koverflow));
         if (!koverflow) {
             ret = secp256k1_ecdsa_sig_sign(&ctx->ecmult_gen_ctx, &r, &s, &sec, &msg, &non, NULL);
             /* The final signature is no longer a secret, nor is the fact that we were successful or not. */
