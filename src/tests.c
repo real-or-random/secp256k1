@@ -3346,6 +3346,20 @@ void run_wnaf(void) {
     secp256k1_scalar_negate(&n, &n);
     test_constant_wnaf(&n, 4);
 
+    /* Test -2, which may not lead to overflows in wnaf_const */
+    secp256k1_scalar_add(&n, &secp256k1_scalar_one, &secp256k1_scalar_one);
+    secp256k1_scalar_negate(&n, &n);
+    test_constant_wnaf(&n, 4);
+
+    /* Test (1/2) - 1 = 1/-2 and 1/2 = (1/-2) + 1
+       as corner cases of negation handling in wnaf_const */
+    secp256k1_scalar_inverse(&n, &n);
+    secp256k1_scalar_mul(&n, &n, &secp256k1_scalar_one);
+    test_constant_wnaf(&n, 4);
+
+    secp256k1_scalar_add(&n, &n, &secp256k1_scalar_one);
+    test_constant_wnaf(&n, 4);
+
     /* Test 0 for fixed wnaf */
     test_fixed_wnaf_small();
     /* Random tests */
