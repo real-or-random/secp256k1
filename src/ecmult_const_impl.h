@@ -111,7 +111,8 @@ static int secp256k1_wnaf_const(int *wnaf, const secp256k1_scalar *scalar, int w
          * therefore we do not need to check its sign. In particular, it's easy
          * to see that u_last is never < 0 because u is never < 0. Moreover,
          * u_last is never = 0 because u is never even after a loop
-         * iteration. */
+         * iteration. The same holds analogously for the initial value of
+         * u_last (in the first loop iteration). */
         VERIFY_CHECK(u_last > 0);
         VERIFY_CHECK((u_last & 1) == 1);
         u += even;
