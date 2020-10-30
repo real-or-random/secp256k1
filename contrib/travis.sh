@@ -3,7 +3,7 @@
 set -e
 set -x
 
-if [ "$HOST" = "i686-linux-gnu" ]
+if [ "$TARGET" = "i686-linux-gnu" ]
 then
     export CC="$CC -m32"
 fi
@@ -19,7 +19,7 @@ fi
     --enable-module-ecdh="$ECDH" --enable-module-recovery="$RECOVERY" \
     --enable-module-schnorrsig="$SCHNORRSIG" \
     --with-valgrind="$WITH_VALGRIND" \
-    --host="$HOST" $EXTRAFLAGS
+    --host="$TARGET" $EXTRAFLAGS
 
 make -j2
 
@@ -30,7 +30,7 @@ fi
 
 if [ -n "$QEMU" ]
 then
-    qemu_run() { docker run --rm -t -v "${PWD}:/mnt/secp256k1" -w /mnt/secp256k1 $QEMU/busybox:glibc "$@"; }
+    qemu_run() { docker run --rm -t -v "${PWD}:/root/secp256k1" -w /root/secp256k1 $QEMU/ubuntu "$@"; }
     qemu_run ./tests
     qemu_run ./exhaustive_tests
 fi

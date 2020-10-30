@@ -1,0 +1,66 @@
+language: c
+#compiler:
+#  - clang
+#  - gcc
+env:
+  global:
+    - WIDEMUL=auto  BIGNUM=auto  STATICPRECOMPUTATION=yes  ECMULTGENPRECISION=auto  ASM=no  BUILD=check  WITH_VALGRIND=yes RUN_VALGRIND=no EXTRAFLAGS= TARGET=  ECDH=no  RECOVERY=no SCHNORRSIG=no EXPERIMENTAL=no CTIMETEST=yes BENCH=yes ITERS=2
+#  matrix:
+#    - WIDEMUL=int64   RECOVERY=yes
+#    - WIDEMUL=int64   ECDH=yes  EXPERIMENTAL=yes SCHNORRSIG=yes
+#    - WIDEMUL=int128
+#    - WIDEMUL=int128  RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes
+#    - WIDEMUL=int128  ECDH=yes EXPERIMENTAL=yes SCHNORRSIG=yes
+#    - WIDEMUL=int128                    ASM=x86_64
+#    - BIGNUM=no
+#    - BIGNUM=no       RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes
+#    - BIGNUM=no       STATICPRECOMPUTATION=no
+#    - BUILD=distcheck WITH_VALGRIND=no CTIMETEST=no BENCH=no
+#    - CPPFLAGS=-DDETERMINISTIC
+#    - CFLAGS=-O0 CTIMETEST=no
+#    - ECMULTGENPRECISION=2
+#    - ECMULTGENPRECISION=8
+#    - RUN_VALGRIND=yes BIGNUM=no ASM=x86_64 ECDH=yes  RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes EXTRAFLAGS="--disable-openssl-tests" BUILD=
+
+matrix:
+  include:
+#    - compiler: clang
+#      env: HOST=i686-linux-gnu
+#    - compiler: clang
+#      env: HOST=i686-linux-gnu
+#    - compiler: gcc
+#      env: HOST=i686-linux-gnu
+#    - compiler: gcc
+#      env: HOST=i686-linux-gnu
+    # S390x build (big endian system)
+    - compiler: gcc
+      env: TARGET=s390x-unknown-linux-gnu ECDH=yes RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes CTIMETEST= BENCH=no WITH_VALGRIND=no BUILD= QEMU=s390x
+
+build:
+  pre_ci_boot:
+    # Ubuntu 18.04
+    image_name: drydock/u18cpp
+    image_tag: master
+    pull: true
+    options: "-e HOME=/root"
+  ci:
+    - sudo dpkg --add-architecture i386
+    - sudo apt-get update
+    - sudo apt-get install libtool-bin valgrind libgmp-dev:i386 libc6-dbg:i386
+    - |
+      if [ -n "$QEMU" ]; then
+      sudo apt-get install gcc-s390x-linux-gnu libc6-dev-s390x-cross
+      docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      fi
+    - ./autogen.sh
+    - function keep_alive() { while true; do echo -en "\a"; sleep 60; done }
+    - keep_alive &
+    - ./contrib/travis.sh
+    - kill %keep_alive || true
+  always:
+    - cat ./tests.log || true
+    - cat ./exhaustive_tests.log || true
+    - cat ./valgrind_ctime_test.log || true
+    - cat ./bench.log || true
+    - $CC --version || true
+    - valgrind --version || true
