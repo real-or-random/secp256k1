@@ -31,10 +31,24 @@ env:
     - BUILD=distcheck WITH_VALGRIND=no CTIMETEST=no BENCH=no
     - CPPFLAGS=-DDETERMINISTIC
     - CFLAGS=-O0 CTIMETEST=no
-    - CFLAGS="-fsanitize=undefined -fno-omit-frame-pointer" LDFLAGS="-fsanitize=undefined -fno-omit-frame-pointer" UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1" BIGNUM=no ASM=x86_64 ECDH=yes RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes CTIMETEST=no
+    - >-
+      BIGNUM=no ASM=no STATICPRECOMPUTATION=no ECDH=yes RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes CTIMETEST=no
+      CFLAGS="-fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address"
+      CFLAGS_FOR_BUILD="-fsanitize=undefined,address" LDFLAGS_FOR_BUILD="-fsanitize=undefined,address"
+      UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+      ASAN_OPTIONS="strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1"
+      LSAN_OPTIONS="use_unaligned=0"
+    - >-
+      BIGNUM=auto ASM=x86_64 STATICPRECOMPUTATION=yes ECDH=yes RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes CTIMETEST=no
+      CFLAGS="-fsanitize=undefined,address" LDFLAGS="-fsanitize=undefined,address"
+      CFLAGS_FOR_BUILD="-fsanitize=undefined,address" LDFLAGS_FOR_BUILD="-fsanitize=undefined,address"
+      UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+      ASAN_OPTIONS="strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1"
+      LSAN_OPTIONS="use_unaligned=0"
     - ECMULTGENPRECISION=2
     - ECMULTGENPRECISION=8
-    - RUN_VALGRIND=yes BIGNUM=no ASM=x86_64 ECDH=yes  RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes EXTRAFLAGS="--disable-openssl-tests" BUILD=
+    - RUN_VALGRIND=yes BIGNUM=no ASM=x86_64 STATICPRECOMPUTATION=no ECDH=yes RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes EXTRAFLAGS="--disable-openssl-tests" BUILD=
+    - RUN_VALGRIND=yes BIGNUM=auto ASM=no STATICPRECOMPUTATION=yes ECDH=yes RECOVERY=yes EXPERIMENTAL=yes SCHNORRSIG=yes EXTRAFLAGS="--disable-openssl-tests" BUILD=
 matrix:
   fast_finish: true
   include:
@@ -107,3 +121,4 @@ after_script:
     - cat ./bench.log
     - $CC --version
     - valgrind --version
+    - cat ./config.log

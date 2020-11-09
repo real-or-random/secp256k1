@@ -3,14 +3,18 @@
 set -e
 set -x
 
+if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$TRAVIS_COMPILER" = "gcc" ]
+then
+    export CC="gcc-9"
+    export CC_FOR_BUILD="$CC"
+fi
+
 if [ "$HOST" = "i686-linux-gnu" ]
 then
     export CC="$CC -m32"
 fi
-if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "$TRAVIS_COMPILER" = "gcc" ]
-then
-    export CC="gcc-9"
-fi
+
+$CC --version
 
 ./configure \
     --enable-experimental="$EXPERIMENTAL" \
