@@ -123,6 +123,9 @@ task:
   name: "x86_64: macOS Catalina"
   macos_instance:
     image: catalina-base
+  env:
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
   matrix:
     << : *ENV_MATRIX
   matrix:
@@ -143,13 +146,33 @@ task:
   ##   - softwareupdate -i "$PROD" --verbose
   ##   - rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
   ##
-  brew_script:
-    # TODO cache the binaries
-    - export HOMEBREW_NO_AUTO_UPDATE=1
-    - export HOMEBREW_NO_INSTALL_CLEANUP=1
+  brew_valgrind_pre_script:
     - brew config
     - brew tap --shallow LouisBrunner/valgrind
-    - brew install --HEAD LouisBrunner/valgrind/valgrind
+    # Fetch valgrind source but don't build it yet.
+    - brew fetch --HEAD LouisBrunner/valgrind/valgrind
+  brew_valgrind_cache:
+    folder: /tmp/valgrind-brew
+    # Rebuild cache if ...
+    fingerprint_script:
+      # ... cache version changes:
+      # (Increase this to force invalidating all old caches.)
+      - echo 1
+      # ... macOS version changes:
+      - sw_vers
+      # ... brew changes:
+      - brew config
+      # ... valgrind changes:
+      - git -C "$(brew --cache)/valgrind--git" rev-parse HEAD
+    populate_script:
+      # If there's no hit in the cache, build and install valgrind.
+      - brew install --build-bottle --HEAD LouisBrunner/valgrind/valgrind
+      - mkdir /tmp/valgrind-brew; cd /tmp/valgrind-brew
+      - brew bottle LouisBrunner/valgrind/valgrind
+      - brew postinstall LouisBrunner/valgrind/valgrind
+  brew_valgrind_post_script:
+    - brew install --ignore-dependencies /tmp/valgrind-brew/*.tar.gz
+  brew_script:
     - brew install automake libtool gmp gcc@9
   test_script:
     - ./ci/cirrus.sh
