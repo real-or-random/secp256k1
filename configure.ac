@@ -123,6 +123,11 @@ AC_ARG_ENABLE(openssl_tests,
     AS_HELP_STRING([--enable-openssl-tests],[enable OpenSSL tests [default=auto]]),
     [enable_openssl_tests=$enableval],
     [enable_openssl_tests=auto])
+    
+AC_ARG_ENABLE(devtools,
+    AS_HELP_STRING([--enable-devtools],[compile tools for development of secp256k1 itself [default=no]]),
+    [enable_devtools=$enableval],
+    [enable_devtools_tests=no])
 
 AC_ARG_ENABLE(experimental,
     AS_HELP_STRING([--enable-experimental],[allow experimental configure options [default=no]]),
@@ -495,6 +500,7 @@ AM_CONDITIONAL([USE_TESTS], [test x"$use_tests" != x"no"])
 AM_CONDITIONAL([USE_EXHAUSTIVE_TESTS], [test x"$use_exhaustive_tests" != x"no"])
 AM_CONDITIONAL([USE_BENCHMARK], [test x"$use_benchmark" = x"yes"])
 AM_CONDITIONAL([USE_ECMULT_STATIC_PRECOMPUTATION], [test x"$set_precomp" = x"yes"])
+AM_CONDITIONAL([ENABLE_DEVTOOLS], [test x"$enable_devtools" = x"yes"])
 AM_CONDITIONAL([ENABLE_MODULE_ECDH], [test x"$enable_module_ecdh" = x"yes"])
 AM_CONDITIONAL([ENABLE_MODULE_RECOVERY], [test x"$enable_module_recovery" = x"yes"])
 AM_CONDITIONAL([ENABLE_MODULE_EXTRAKEYS], [test x"$enable_module_extrakeys" = x"yes"])
@@ -517,6 +523,7 @@ echo "  with benchmarks         = $use_benchmark"
 echo "  with tests              = $use_tests"
 echo "  with openssl tests      = $enable_openssl_tests"
 echo "  with coverage           = $enable_coverage"
+echo "  with devtools           = $enable_devtools"
 echo "  module ecdh             = $enable_module_ecdh"
 echo "  module recovery         = $enable_module_recovery"
 echo "  module extrakeys        = $enable_module_extrakeys"
