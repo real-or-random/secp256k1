@@ -123,10 +123,12 @@ exhaustive_tests_LDFLAGS = -static
 TESTS += exhaustive_tests
 endif
 
-if ENABLE_DEVTOOLS
-noinst_PROGRAMS += gen_ecmult_static_pre_g
+EXTRA_PROGRAMS = gen_ecmult_static_pre_g
 gen_ecmult_static_pre_g_SOURCES = src/gen_ecmult_static_pre_g.c
-endif
+# See Automake manual, Section "Errors with distclean"
+src/ecmult_static_pre_g.h:
+	$(MAKE) $(AM_MAKEFLAGS) gen_ecmult_static_pre_g$(EXEEXT)
+	./gen_ecmult_static_pre_g$(EXEEXT)
 
 if USE_ECMULT_STATIC_PRECOMPUTATION
 CPPFLAGS_FOR_BUILD +=-I$(top_srcdir) -I$(builddir)/src
