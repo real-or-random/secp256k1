@@ -51,11 +51,10 @@ int main(int argc, char **argv) {
             "SECP256K1_GE_STORAGE_CONST(0x##a##u,0x##b##u,0x##c##u,0x##d##u,0x##e##u,0x##f##u,0x##g##u,"
             "0x##h##u,0x##i##u,0x##j##u,0x##k##u,0x##l##u,0x##m##u,0x##n##u,0x##o##u,0x##p##u)\n");
 
-    fprintf(fp, "static\n");
-    fprintf(fp, "#ifndef EXHAUSTIVE_TEST_ORDER\n");
-    fprintf(fp, "const\n");
-    fprintf(fp, "#endif\n");
-    fprintf(fp, "secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)] = {\n");
+    fprintf(fp, "#ifdef EXHAUSTIVE_TEST_ORDER\n");
+    fprintf(fp, "static secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)];\n");
+    fprintf(fp, "#else\n");
+    fprintf(fp, "static const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)] = {\n");
 
     for (bits = 2; bits <= 8; bits *= 2) {
         int g = ECMULT_GEN_PREC_G(bits);
@@ -87,8 +86,9 @@ int main(int argc, char **argv) {
     }
 
     fprintf(fp,"};\n");
+    fprintf(fp, "#endif /* EXHAUSTIVE_TEST_ORDER */\n");
     fprintf(fp, "#undef SC\n");
-    fprintf(fp, "#endif\n");
+    fprintf(fp, "#endif /* SECP256K1_ECMULT_GEN_STATIC_PREC_TABLE_H */\n");
     fclose(fp);
 
     return 0;
