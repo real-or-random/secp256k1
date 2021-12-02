@@ -5,9 +5,9 @@
 #include "src/group.h"
 #define S(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) SECP256K1_GE_STORAGE_CONST(0x##a##u,0x##b##u,0x##c##u,0x##d##u,0x##e##u,0x##f##u,0x##g##u,0x##h##u,0x##i##u,0x##j##u,0x##k##u,0x##l##u,0x##m##u,0x##n##u,0x##o##u,0x##p##u)
 #ifdef EXHAUSTIVE_TEST_ORDER
-static secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)];
+static secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_BITS)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_BITS)];
 #else
-static const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)] = {
+static const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_BITS)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_BITS)] = {
 #if ECMULT_GEN_PREC_BITS == 2
 {S(3a9ed373,6eed3eec,9aeb5ac0,21b54652,56817b1f,8de6cd0,fbcee548,ba044bb5,7bcc5928,bdc9c023,dfc663b8,9e4f6969,ab751798,8e600ec1,d242010c,45c7974a),
 S(e44d7675,c3cb2857,4e133c01,a74f4afc,5ce684f8,4a789711,603f7c4f,50abef58,25bcb62f,fe2e2ce2,196ad86c,a006e20,8c64d21b,b25320a3,b5574b9c,1e1bfb4b),
