@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
         free(table);
     }
 
-    fprintf(fp,"};\n");
+    fprintf(fp, "};\n");
     fprintf(fp, "#endif /* EXHAUSTIVE_TEST_ORDER */\n");
     fprintf(fp, "#undef SC\n");
     fprintf(fp, "#endif /* SECP256K1_ECMULT_GEN_STATIC_PREC_TABLE_H */\n");
