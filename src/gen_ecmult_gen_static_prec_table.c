@@ -46,9 +46,9 @@ int main(int argc, char **argv) {
             "0x##h##u,0x##i##u,0x##j##u,0x##k##u,0x##l##u,0x##m##u,0x##n##u,0x##o##u,0x##p##u)\n");
 
     fprintf(fp, "#ifdef EXHAUSTIVE_TEST_ORDER\n");
-    fprintf(fp, "static secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)];\n");
+    fprintf(fp, "static secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_BITS)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_BITS)];\n");
     fprintf(fp, "#else\n");
-    fprintf(fp, "static const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_B)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_B)] = {\n");
+    fprintf(fp, "static const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_BITS)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_BITS)] = {\n");
 
     for (bits = 2; bits <= 8; bits *= 2) {
         int g = ECMULT_GEN_PREC_G(bits);

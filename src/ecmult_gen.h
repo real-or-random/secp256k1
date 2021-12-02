@@ -13,7 +13,6 @@
 #if ECMULT_GEN_PREC_BITS != 2 && ECMULT_GEN_PREC_BITS != 4 && ECMULT_GEN_PREC_BITS != 8
 #  error "Set ECMULT_GEN_PREC_BITS to 2, 4 or 8."
 #endif
-#define ECMULT_GEN_PREC_B ECMULT_GEN_PREC_BITS
 #define ECMULT_GEN_PREC_G(bits) (1 << bits)
 #define ECMULT_GEN_PREC_N(bits) (256 / bits)
 

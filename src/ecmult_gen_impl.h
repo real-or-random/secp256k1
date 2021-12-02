@@ -31,7 +31,7 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx
 
 /* For accelerating the computation of a*G:
  * To harden against timing attacks, use the following mechanism:
- * * Break up the multiplicand into groups of PREC_B bits, called n_0, n_1, n_2, ..., n_(PREC_N-1).
+ * * Break up the multiplicand into groups of PREC_BITS bits, called n_0, n_1, n_2, ..., n_(PREC_N-1).
  * * Compute sum(n_i * (PREC_G)^i * G + U_i, i=0 ... PREC_N-1), where:
  *   * U_i = U * 2^i, for i=0 ... PREC_N-2
  *   * U_i = U * (1-2^(PREC_N-1)), for i=PREC_N-1
@@ -43,7 +43,7 @@ static void secp256k1_ecmult_gen_context_clear(secp256k1_ecmult_gen_context *ctx
  * The prec values are stored in secp256k1_ecmult_gen_prec_table[i][n_i] = n_i * (PREC_G)^i * G + U_i.
  */
 static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp256k1_gej *r, const secp256k1_scalar *gn) {
-    int bits = ECMULT_GEN_PREC_B;
+    int bits = ECMULT_GEN_PREC_BITS;
     int g = ECMULT_GEN_PREC_G(bits);
     int n = ECMULT_GEN_PREC_N(bits);
 
