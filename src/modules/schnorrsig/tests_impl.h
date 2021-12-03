@@ -198,6 +198,8 @@ void test_schnorrsig_api(void) {
     CHECK(ecount == 4);
     CHECK(secp256k1_schnorrsig_sign_custom(sign, sig, msg, sizeof(msg), &keypairs[0], &invalid_extraparams) == 0);
     CHECK(ecount == 5);
+    CHECK(secp256k1_schnorrsig_sign_custom(sttc, sig, msg, sizeof(msg), &keypairs[0], &extraparams) == 0);
+    CHECK(ecount == 6);
 
     ecount = 0;
     CHECK(secp256k1_schnorrsig_sign(sign, sig, msg, &keypairs[0], NULL) == 1);
