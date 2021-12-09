@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     fprintf(fp, "#ifndef SECP256K1_ECMULT_GEN_STATIC_PREC_TABLE_H\n");
     fprintf(fp, "#define SECP256K1_ECMULT_GEN_STATIC_PREC_TABLE_H\n");
 
-    fprintf(fp, "#include \"src/group.h\"\n");
+    fprintf(fp, "#include \"group.h\"\n");
 
     fprintf(fp, "#define S(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) "
             "SECP256K1_GE_STORAGE_CONST(0x##a##u,0x##b##u,0x##c##u,0x##d##u,0x##e##u,0x##f##u,0x##g##u,"
