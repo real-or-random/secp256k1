@@ -7,12 +7,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-/* Autotools creates libsecp256k1-config.h, of which ECMULT_GEN_PREC_BITS is needed.
-   ifndef guard so downstream users can define their own if they do not use autotools. */
-#if !defined(ECMULT_GEN_PREC_BITS)
-#include "libsecp256k1-config.h"
-#endif
-
 #include "../include/secp256k1.h"
 #include "assumptions.h"
 #include "util.h"
