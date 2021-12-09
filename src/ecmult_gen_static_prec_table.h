@@ -2,7 +2,7 @@
 /* See ecmult_gen_impl.h for details about the contents of this file. */
 #ifndef SECP256K1_ECMULT_GEN_STATIC_PREC_TABLE_H
 #define SECP256K1_ECMULT_GEN_STATIC_PREC_TABLE_H
-#include "src/group.h"
+#include "group.h"
 #define S(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) SECP256K1_GE_STORAGE_CONST(0x##a##u,0x##b##u,0x##c##u,0x##d##u,0x##e##u,0x##f##u,0x##g##u,0x##h##u,0x##i##u,0x##j##u,0x##k##u,0x##l##u,0x##m##u,0x##n##u,0x##o##u,0x##p##u)
 #ifdef EXHAUSTIVE_TEST_ORDER
 static secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[ECMULT_GEN_PREC_N(ECMULT_GEN_PREC_BITS)][ECMULT_GEN_PREC_G(ECMULT_GEN_PREC_BITS)];
