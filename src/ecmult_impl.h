@@ -492,7 +492,8 @@ static int secp256k1_ecmult_pippenger_wnaf(secp256k1_gej *buckets, int bucket_wi
     }
 
     for (i = n_wnaf - 1; i >= 0; i--) {
-        secp256k1_gej running_sum;
+        secp256k1_geh running_sum;
+        secp256k1_geh rh;
 
         for(j = 0; j < ECMULT_TABLE_SIZE(bucket_window+2); j++) {
             secp256k1_gej_set_infinity(&buckets[j]);
@@ -526,7 +527,8 @@ static int secp256k1_ecmult_pippenger_wnaf(secp256k1_gej *buckets, int bucket_wi
             secp256k1_gej_double_var(r, r, NULL);
         }
 
-        secp256k1_gej_set_infinity(&running_sum);
+        secp256k1_geh_set_gej_var(&rh, r);
+        secp256k1_geh_set_infinity(&running_sum);
         /* Accumulate the sum: bucket[0] + 3*bucket[1] + 5*bucket[2] + 7*bucket[3] + ...
          *                   = bucket[0] +   bucket[1] +   bucket[2] +   bucket[3] + ...
          *                   +         2 *  (bucket[1] + 2*bucket[2] + 3*bucket[3] + ...)
@@ -536,11 +538,16 @@ static int secp256k1_ecmult_pippenger_wnaf(secp256k1_gej *buckets, int bucket_wi
          * The doubling is done implicitly by deferring the final window doubling (of 'r').
          */
         for(j = ECMULT_TABLE_SIZE(bucket_window+2) - 1; j > 0; j--) {
-            secp256k1_gej_add_var(&running_sum, &running_sum, &buckets[j], NULL);
-            secp256k1_gej_add_var(r, r, &running_sum, NULL);
+            /* 26M+1S (instead of 24M+8S in pure gej) times 2**bucket_window loop iters */
+            secp256k1_geh tmp;
+            /* TODO maybe there's a more efficient way to perform a geh_add_gej_var */
+            secp256k1_geh_set_gej_var(&tmp, &buckets[j]);            /*  2M+1S */
+            secp256k1_geh_add_var(&running_sum, &running_sum, &tmp); /* 12M    */
+            secp256k1_geh_add_var(&rh, &rh, &running_sum, NULL);     /* 12M    */
         }
 
-        secp256k1_gej_add_var(&running_sum, &running_sum, &buckets[0], NULL);
+        secp256k1_geh_add_var(&running_sum, &running_sum, &buckets[0]);
+        secp256k1_gej_set_geh_var(r, &rh);
         secp256k1_gej_double_var(r, r, NULL);
         secp256k1_gej_add_var(r, r, &running_sum, NULL);
     }
