@@ -1,19 +1,16 @@
 #ifndef SECP256K1_INT128_H
 #define SECP256K1_INT128_H
 
-#if defined HAVE_CONFIG_H
-#include "libsecp256k1-config.h"
-#endif
-
 #include "util.h"
 
-#if defined(SECP256K1_INT128_NATIVE)
-#include "int128_native.h"
-#elif defined(SECP256K1_INT128_STRUCT)
-#include "int128_struct.h"
-#else
-#error "Please select int128 implementation"
-#endif
+#if defined(SECP256K1_WIDEMUL_INT128)
+#  if defined(SECP256K1_INT128_NATIVE)
+#    include "int128_native.h"
+#  elif defined(SECP256K1_INT128_STRUCT)
+#    include "int128_struct.h"
+#  else
+#    error "Please select int128 implementation"
+#  endif
 
 static SECP256K1_INLINE void secp256k1_u128_mul(secp256k1_uint128 *r, uint64_t a, uint64_t b);
 
@@ -52,5 +49,7 @@ static SECP256K1_INLINE void secp256k1_i128_from_i64(secp256k1_int128 *r, int64_
 static SECP256K1_INLINE int secp256k1_i128_eq(const secp256k1_int128 *a, const secp256k1_int128 *b);
 
 static SECP256K1_INLINE int secp256k1_i128_check_bit(secp256k1_int128 *r, unsigned int n);
+
+#endif
 
 #endif
