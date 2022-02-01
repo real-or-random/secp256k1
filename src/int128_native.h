@@ -1,5 +1,5 @@
-#ifndef SECP256K1_INT128_H
-#define SECP256K1_INT128_H
+#ifndef SECP256K1_INT128_NATIVE_H
+#define SECP256K1_INT128_NATIVE_H
 
 #include <stdint.h>
 #include "util.h"
