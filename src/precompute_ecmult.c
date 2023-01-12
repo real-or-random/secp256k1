@@ -79,7 +79,6 @@ int main(void) {
     fprintf(fp, "#ifdef EXHAUSTIVE_TEST_ORDER\n");
     fprintf(fp, "#    error Cannot compile precomputed_ecmult.c in exhaustive test mode\n");
     fprintf(fp, "#endif /* EXHAUSTIVE_TEST_ORDER */\n");
-    fprintf(fp, "#define WINDOW_G ECMULT_WINDOW_SIZE\n");
 
     print_two_tables(fp, window_g);
 

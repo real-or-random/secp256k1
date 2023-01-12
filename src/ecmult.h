@@ -22,7 +22,16 @@
 #  pragma message DEBUG_CONFIG_DEF(ECMULT_WINDOW_SIZE)
 #endif
 
-/* Noone will ever need more than a window size of 24. The code might
+/** Larger values for ECMULT_WINDOW_SIZE result in possibly better
+ *  performance at the cost of an exponentially larger precomputed
+ *  table. The exact table size is
+ *      (1 << (WINDOW_G - 2)) * sizeof(secp256k1_ge_storage)  bytes,
+ *  where sizeof(secp256k1_ge_storage) is typically 64 bytes but can
+ *  be larger due to platform-specific padding and alignment.
+ *  Two tables of this size are used (due to the endomorphism
+ *  optimization).
+ *
+ * Noone will ever need more than a window size of 24. The code might
  * be correct for larger values of ECMULT_WINDOW_SIZE but this is not
  * tested.
  *
@@ -35,6 +44,25 @@
  */
 #if ECMULT_WINDOW_SIZE < 2 || ECMULT_WINDOW_SIZE > 24
 #  error Set ECMULT_WINDOW_SIZE to an integer in range [2..24].
+#endif
+
+#if defined(EXHAUSTIVE_TEST_ORDER)
+/* We need to lower these values for exhaustive tests because
+ * the tables cannot have infinities in them (this breaks the
+ * affine-isomorphism stuff which tracks z-ratios) */
+#  if EXHAUSTIVE_TEST_ORDER > 128
+#    define WINDOW_A 5
+#    define WINDOW_G 8
+#  elif EXHAUSTIVE_TEST_ORDER > 8
+#    define WINDOW_A 4
+#    define WINDOW_G 4
+#  else
+#    define WINDOW_A 2
+#    define WINDOW_G 2
+#  endif
+#else
+#  define WINDOW_A 5 /* optimal for 128-bit and 256-bit exponents. */
+#  define WINDOW_G ECMULT_WINDOW_SIZE
 #endif
 
 /** The number of entries a table with precomputed multiples needs to have. */

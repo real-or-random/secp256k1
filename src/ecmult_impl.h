@@ -16,31 +16,6 @@
 #include "ecmult.h"
 #include "precomputed_ecmult.h"
 
-#if defined(EXHAUSTIVE_TEST_ORDER)
-/* We need to lower these values for exhaustive tests because
- * the tables cannot have infinities in them (this breaks the
- * affine-isomorphism stuff which tracks z-ratios) */
-#  if EXHAUSTIVE_TEST_ORDER > 128
-#    define WINDOW_A 5
-#  elif EXHAUSTIVE_TEST_ORDER > 8
-#    define WINDOW_A 4
-#  else
-#    define WINDOW_A 2
-#  endif
-#else
-/* optimal for 128-bit and 256-bit exponents. */
-#  define WINDOW_A 5
-/** Larger values for ECMULT_WINDOW_SIZE result in possibly better
- *  performance at the cost of an exponentially larger precomputed
- *  table. The exact table size is
- *      (1 << (WINDOW_G - 2)) * sizeof(secp256k1_ge_storage)  bytes,
- *  where sizeof(secp256k1_ge_storage) is typically 64 bytes but can
- *  be larger due to platform-specific padding and alignment.
- *  Two tables of this size are used (due to the endomorphism
- *  optimization).
- */
-#endif
-
 #define WNAF_BITS 128
 #define WNAF_SIZE_BITS(bits, w) (((bits) + (w) - 1) / (w))
 #define WNAF_SIZE(w) WNAF_SIZE_BITS(WNAF_BITS, w)
