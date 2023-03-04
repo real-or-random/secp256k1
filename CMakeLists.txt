@@ -10,7 +10,7 @@ endif()
 # The package (a.k.a. release) version is based on semantic versioning 2.0.0 of
 # the API. All changes in experimental modules are treated as
 # backwards-compatible and therefore at most increase the minor version.
-project(secp256k1 VERSION 0.2.1 LANGUAGES NONE)
+project(secp256k1 VERSION 0.2.1 LANGUAGES C)
 
 # The library version is based on libtool versioning of the ABI. The set of
 # rules for updating the version can be found here:
@@ -21,7 +21,6 @@ set(${PROJECT_NAME}_LIB_VERSION_CURRENT 1)
 set(${PROJECT_NAME}_LIB_VERSION_REVISION 1)
 set(${PROJECT_NAME}_LIB_VERSION_AGE 0)
 
-enable_language(C)
 set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
