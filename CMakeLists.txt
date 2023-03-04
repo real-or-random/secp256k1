@@ -147,15 +147,15 @@ else()
 endif()
 
 # Define custom "Coverage" build type.
-set(CMAKE_C_FLAGS_COVERAGE "-DCOVERAGE -O0 --coverage -Wno-unused-parameter" CACHE STRING
+set(CMAKE_C_FLAGS_COVERAGE "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DCOVERAGE=1 --coverage -Wno-unused-parameter" CACHE STRING
   "Flags used by the C compiler during \"Coverage\" builds."
   FORCE
 )
-set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "--coverage" CACHE STRING
+set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} --coverage" CACHE STRING
   "Flags used for linking binaries during \"Coverage\" builds."
   FORCE
 )
-set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE "--coverage" CACHE STRING
+set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} --coverage" CACHE STRING
   "Flags used by the shared libraries linker during \"Coverage\" builds."
   FORCE
 )
