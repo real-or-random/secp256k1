@@ -172,7 +172,6 @@ endif()
 
 include(TryAddCompileOption)
 if(MSVC)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   try_add_compile_option(/W2)
   try_add_compile_option(/wd4146)
 else()
