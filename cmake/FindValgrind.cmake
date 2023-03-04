@@ -10,7 +10,7 @@ endif()
 
 find_path(Valgrind_INCLUDE_DIR
   NAMES valgrind/memcheck.h
-  HINTS ${valgrind_brew_prefix}/include
+  HINTS $<valgrind_brew_prefix:{valgrind_brew_prefix}/include>$
 )
 
 if(Valgrind_INCLUDE_DIR)
