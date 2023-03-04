@@ -167,10 +167,10 @@ mark_as_advanced(
 get_property(cached_cmake_build_type CACHE CMAKE_BUILD_TYPE PROPERTY TYPE)
 if(cached_cmake_build_type)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
-    STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo" "Coverage"
+    STRINGS "RelWithDebInfo" "Release" "Debug" "MinSizeRel" "Coverage"
   )
 endif()
-set(default_build_type "Release")
+set(default_build_type "RelWithDebInfo")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to \"${default_build_type}\" as none was specified")
   set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
@@ -210,7 +210,7 @@ if(SECP256K1_BUILD_BENCHMARK OR SECP256K1_BUILD_TESTS OR SECP256K1_BUILD_EXHAUST
   mark_as_advanced(BUILD_TESTING)
   enable_testing()
   add_custom_target(check
-    COMMAND ${CMAKE_CTEST_COMMAND} -C $<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Debug>:Debug>
     VERBATIM
   )
 endif()
@@ -276,7 +276,7 @@ if(DEFINED CMAKE_BUILD_TYPE)
   message(" - LDFLAGS for shared libraries ....... ${CMAKE_SHARED_LINKER_FLAGS_${build_type}}")
 else()
   message("Available configurations .............. ${CMAKE_CONFIGURATION_TYPES}")
-  message("Release configuration:")
+  message("RelWithDebInfo configuration:")
   message(" - CFLAGS ............................. ${CMAKE_C_FLAGS_RELEASE}")
   message(" - LDFLAGS for executables ............ ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
   message(" - LDFLAGS for shared libraries ....... ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
