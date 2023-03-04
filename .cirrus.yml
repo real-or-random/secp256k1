@@ -388,7 +388,7 @@ task:
     cpu: 4
     memory: 3840MB
   env:
-    PATH: '%CIRRUS_WORKING_DIR%\build\src\Release;%PATH%'
+    PATH: '%CIRRUS_WORKING_DIR%\build\src\RelWithDebInfo;%PATH%'
     x64_NATIVE_TOOLS: '"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"'
     # Ignore MSBuild warning MSB8029.
     # See: https://learn.microsoft.com/en-us/visualstudio/msbuild/errors/msb8029?view=vs-2022
@@ -400,7 +400,7 @@ task:
     - cmake -G "Visual Studio 17 2022" -A x64 -S . -B build -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON
   build_script:
     - '%x64_NATIVE_TOOLS%'
-    - cmake --build build --config Release -j 5 -- /p:CL_MPcount=5
+    - cmake --build build --config RelWithDebInfo -j 5 -- /p:CL_MPcount=5
   check_script:
     - '%x64_NATIVE_TOOLS%'
     - ctest --test-dir build -j 5
