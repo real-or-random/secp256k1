@@ -216,7 +216,7 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CTEST_TEST_TARGET_ALIAS check)
 include(CTest)
 if(SECP256K1_BUILD_BENCHMARK OR SECP256K1_BUILD_TESTS OR SECP256K1_BUILD_EXHAUSTIVE_TESTS OR SECP256K1_BUILD_CTIME_TESTS OR SECP256K1_BUILD_EXAMPLES)
-  # We do not use CMake CTest's BUILD_TESTING option.
+  # We do not use CTest's BUILD_TESTING because a single toggle for all tests is too coarse for our needs.
   mark_as_advanced(BUILD_TESTING)
   enable_testing()
 endif()
