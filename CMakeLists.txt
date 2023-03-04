@@ -133,11 +133,17 @@ option(SECP256K1_BUILD_CTIME_TESTS "Build constant-time tests." ${SECP256K1_VALG
 option(SECP256K1_BUILD_EXAMPLES "Build examples." OFF)
 
 # Redefine configuration flags.
+# We leave assertions on, because they are only used in the examples, and we want them always on there.
 if(MSVC)
-  string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+  string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+  string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+  string(REPLACE "/DNDEBUG" "" CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL}")
 else()
-  set(CMAKE_C_FLAGS_DEBUG "-O0 -g3")
-  set(CMAKE_C_FLAGS_RELEASE "-O2 -g")
+  string(REPLACE "-DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+  string(REPLACE "-DNDEBUG" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+  string(REPLACE "-DNDEBUG" "" CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL}")
+  # Prefer -O2 optimization level. (-O3 is CMake's default for Release for many compilers.)
+  string(REPLACE "-O3" "-O2" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 endif()
 
 # Define custom "Coverage" build type.
