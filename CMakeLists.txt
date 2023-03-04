@@ -216,7 +216,7 @@ if(SECP256K1_BUILD_BENCHMARK OR SECP256K1_BUILD_TESTS OR SECP256K1_BUILD_EXHAUST
   mark_as_advanced(BUILD_TESTING)
   enable_testing()
   add_custom_target(check
-    COMMAND ${CMAKE_CTEST_COMMAND} -C $<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Debug>:Debug>
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
     VERBATIM
   )
 endif()
