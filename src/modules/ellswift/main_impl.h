@@ -30,8 +30,8 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
      * - If u^3+7+t^2 = 0, set t=2*t.
      * - Let X=(u^3+7-t^2)/(2*t)
      * - Let Y=(X+t)/(c0*u)
-     * - If x3=u+4*Y^2 is a valid x coordinate, return x3.
-     * - If x2=(-X/Y-u)/2 is a valid x coordinate, return x2.
+     * - If x3=u+4*Y^2 is a valid x coordinate, return it.
+     * - If x2=(-X/Y-u)/2 is a valid x coordinate, return it.
      * - Return x1=(X/Y-u)/2 (which is now guaranteed to be a valid x coordinate).
      *
      * Introducing s=t^2, g=u^3+7, and simplifying x1=-(x2+u) we get:
@@ -44,7 +44,7 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
      * - If g+s=0, set t=2*t, s=4*s
      * - Let X=(g-s)/(2*t)
      * - Let Y=(X+t)/(c0*u) = (g+s)/(2*c0*t*u)
-     * - If x3=u+4*Y^2 is a valid x coordinate, return x3.
+     * - If x3=u+4*Y^2 is a valid x coordinate, return it.
      * - If x2=(-X/Y-u)/2 is a valid x coordinate, return it.
      * - Return x1=-(x2+u).
      *
@@ -94,7 +94,7 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
     p = g; /* p = g */
     secp256k1_fe_add(&p, &s); /* p = g+s */
     if (EXPECT(secp256k1_fe_normalizes_to_zero_var(&p), 0)) {
-        secp256k1_fe_mul_int(&s, 4); /* s = 4*s */
+        secp256k1_fe_mul_int(&s, 4);
         /* recompute p = g+s */
         p = g; /* p = g */
         secp256k1_fe_add(&p, &s); /* p = g+s */
@@ -106,7 +106,7 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
     secp256k1_fe_mul(&n, &d, &u1); /* n = 3*s*u^3 */
     secp256k1_fe_add(&n, &l); /* n = 3*s*u^3-(g+s)^2 */
     if (secp256k1_ge_x_frac_on_curve_var(&n, &d)) {
-        /* Return n/d = (3*s*u^3-(g+s)^2)/(3*s*u^2) */
+        /* Return x3 = n/d = (3*s*u^3-(g+s)^2)/(3*s*u^2) */
         *xn = n;
         *xd = d;
         return;
@@ -116,10 +116,10 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
     secp256k1_fe_mul(&n, &secp256k1_ellswift_c2, &g); /* n = c2*g */
     secp256k1_fe_add(&n, &l); /* n = c1*s+c2*g */
     secp256k1_fe_mul(&n, &n, &u1); /* n = u*(c1*s+c2*g) */
-    /* Possible optimization: in the invocation below, d^2 = (g+s)^2 is computed,
+    /* Possible optimization: in the invocation below, p^2 = (g+s)^2 is computed,
      * which we already have computed above. This could be deduplicated. */
     if (secp256k1_ge_x_frac_on_curve_var(&n, &p)) {
-        /* Return n/p = u*(c1*s+c2*g)/(g+s) */
+        /* Return x2 = n/p = u*(c1*s+c2*g)/(g+s) */
         *xn = n;
         return;
     }
@@ -129,7 +129,7 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
 #ifdef VERIFY
     VERIFY_CHECK(secp256k1_ge_x_frac_on_curve_var(xn, &p));
 #endif
-    /* Return n/p = -(u*(c1*s+c2*g)/(g+s)+u) */
+    /* Return x3 = n/p = -(u*(c1*s+c2*g)/(g+s)+u) */
 }
 
 /** Decode ElligatorSwift encoding (u, t) to X coordinate. */
@@ -226,7 +226,7 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
          * => x^3 = -(x + u)^3
          * => x^3 + B = (-u - x)^3 + B
          *
-         * However, We know x^3 + B is square (because x is on the curve) and
+         * However, we know x^3 + B is square (because x is on the curve) and
          * that (-u-x)^3 + B is not square (the secp256k1_ge_x_on_curve_var(&m)
          * test above would have failed). This is a contradiction, and thus the
          * assumption s=0 is false. */
@@ -306,8 +306,8 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
 
 /** Use SHA256 as a PRNG, returning SHA256(hasher || cnt).
  *
- * hasher is a SHA256 object which a incrementing 4-byte counter is added to generate randomness.
- * Adding 13 bytes (4 bytes for counter, plus 9 bytes for the SHA256 padding) cannot cross a
+ * hasher is a SHA256 object to which an incrementing 4-byte counter is written to generate randomness.
+ * Writing 13 bytes (4 bytes for counter, plus 9 bytes for the SHA256 padding) cannot cross a
  * 64-byte block size boundary (to make sure it only triggers a single SHA256 compression). */
 static void secp256k1_ellswift_prng(unsigned char* out32, const secp256k1_sha256 *hasher, uint32_t cnt) {
     secp256k1_sha256 hash = *hasher;

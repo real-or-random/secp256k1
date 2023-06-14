@@ -60,11 +60,11 @@ extern "C" {
  *           data:       arbitrary data pointer that is passed through
  */
 typedef int (*secp256k1_ellswift_xdh_hash_function)(
-  unsigned char *output,
-  const unsigned char *x32,
-  const unsigned char *ell_a64,
-  const unsigned char *ell_b64,
-  void *data
+    unsigned char *output,
+    const unsigned char *x32,
+    const unsigned char *ell_a64,
+    const unsigned char *ell_b64,
+    void *data
 );
 
 /** Construct a 64-byte ElligatorSwift encoding of a given pubkey.
