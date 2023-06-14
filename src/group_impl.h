@@ -823,8 +823,7 @@ static int secp256k1_ge_is_in_correct_subgroup(const secp256k1_ge* ge) {
 #endif
 }
 
-static int secp256k1_ge_x_on_curve_var(const secp256k1_fe *x)
-{
+static int secp256k1_ge_x_on_curve_var(const secp256k1_fe *x) {
     secp256k1_fe c;
     secp256k1_fe_sqr(&c, x);
     secp256k1_fe_mul(&c, &c, x);

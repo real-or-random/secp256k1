@@ -3934,7 +3934,7 @@ static void test_ge(void) {
         free(ge_set_all);
     }
 
-    /* Test all elements have X coordinates on the curve. */
+    /* Test that all elements have X coordinates on the curve. */
     for (i = 1; i < 4 * runs + 1; i++) {
         secp256k1_fe n;
         CHECK(secp256k1_ge_x_on_curve_var(&ge[i].x));
@@ -3943,7 +3943,7 @@ static void test_ge(void) {
         CHECK(secp256k1_ge_x_frac_on_curve_var(&n, &zf));
     }
 
-    /* Test correspondence secp256k1_ge_x{,_frac}_on_curve_var with ge_set_xo. */
+    /* Test correspondence of secp256k1_ge_x{,_frac}_on_curve_var with ge_set_xo. */
     {
         secp256k1_fe n;
         secp256k1_ge q;
