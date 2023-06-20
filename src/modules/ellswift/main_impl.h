@@ -265,9 +265,8 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
         secp256k1_fe_mul(&q, &s, &g); /* q = s*u^2 */
         secp256k1_fe_mul_int(&q, 3); /* q = 3*s*u^2 */
         secp256k1_fe_mul(&g, &g, &u); /* g = u^3 */
-        secp256k1_fe_add_int(&g, SECP256K1_B); /* g = u^3+7 */
-        secp256k1_fe_normalize_weak(&g);
-        secp256k1_fe_mul_int(&g, 4); /* g = 4*(u^3+7) */
+        secp256k1_fe_mul_int(&g, 4); /* g = 4*u^3 */
+        secp256k1_fe_add_int(&g, 4 * SECP256K1_B); /* g = 4*(u^3+7) */
         secp256k1_fe_add(&q, &g); /* q = 4*(u^3+7)+3*s*u^2 */
         secp256k1_fe_mul(&q, &q, &s); /* q = s*(4*(u^3+7)+3*u^2*s) */
         secp256k1_fe_negate(&q, &q, 1); /* q = -s*(4*(u^3+7)+3*u^2*s) */
