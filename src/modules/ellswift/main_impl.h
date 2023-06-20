@@ -187,7 +187,7 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
      * - If (c & 5) = 4: return  w*(c3*u + v).
      * - If (c & 5) = 5: return -w*(c4*u + v).
      */
-    secp256k1_fe x = *x_in, u = *u_in, u2, g, v, s, m, r, q;
+    secp256k1_fe x = *x_in, u = *u_in, g, v, s, m, r, q;
     int ret;
 
     secp256k1_fe_normalize_weak(&x);
@@ -261,13 +261,13 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
         if (!secp256k1_fe_is_square_var(&s)) return 0;
 
         /* Let r = sqrt(-s*(4*(u^3+7)+3*u^2*s)); fail if it doesn't exist. */
-        secp256k1_fe_sqr(&u2, &u); /* u2 = u^2 */
-        secp256k1_fe_mul(&g, &u2, &u); /* g = u^3 */
+        secp256k1_fe_sqr(&g, &u); /* g = u^2 */
+        secp256k1_fe_mul(&q, &s, &g); /* q = s*u^2 */
+        secp256k1_fe_mul_int(&q, 3); /* q = 3*s*u^2 */
+        secp256k1_fe_mul(&g, &g, &u); /* g = u^3 */
         secp256k1_fe_add_int(&g, SECP256K1_B); /* g = u^3+7 */
         secp256k1_fe_normalize_weak(&g);
         secp256k1_fe_mul_int(&g, 4); /* g = 4*(u^3+7) */
-        secp256k1_fe_mul_int(&u2, 3); /* u2 = 3*u^2 */
-        secp256k1_fe_mul(&q, &s, &u2); /* q = 3*s*u^2 */
         secp256k1_fe_add(&q, &g); /* q = 4*(u^3+7)+3*s*u^2 */
         secp256k1_fe_mul(&q, &q, &s); /* q = s*(4*(u^3+7)+3*u^2*s) */
         secp256k1_fe_negate(&q, &q, 1); /* q = -s*(4*(u^3+7)+3*u^2*s) */
