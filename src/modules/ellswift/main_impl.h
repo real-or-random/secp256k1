@@ -25,63 +25,63 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
     /* The implemented algorithm is the following (all operations in GF(p)):
      *
      * - Let c0 = sqrt(-3) = 0xa2d2ba93507f1df233770c2a797962cc61f6d15da14ecd47d8d27ae1cd5f852.
-     * - If u=0, set u=1.
-     * - If t=0, set t=1.
-     * - If u^3+7+t^2 = 0, set t=2*t.
-     * - Let X=(u^3+7-t^2)/(2*t).
-     * - Let Y=(X+t)/(c0*u).
-     * - If x3=u+4*Y^2 is a valid x coordinate, return it.
-     * - If x2=(-X/Y-u)/2 is a valid x coordinate, return it.
-     * - Return x1=(X/Y-u)/2 (which is now guaranteed to be a valid x coordinate).
+     * - If u = 0, set u = 1.
+     * - If t = 0, set t = 1.
+     * - If u^3+7+t^2 = 0, set t = 2*t.
+     * - Let X = (u^3+7-t^2)/(2*t).
+     * - Let Y = (X+t)/(c0*u).
+     * - If x3 = u+4*Y^2 is a valid x coordinate, return it.
+     * - If x2 = (-X/Y-u)/2 is a valid x coordinate, return it.
+     * - Return x1 = (X/Y-u)/2 (which is now guaranteed to be a valid x coordinate).
      *
      * Introducing s=t^2, g=u^3+7, and simplifying x1=-(x2+u) we get:
      *
      * - Let c0 = ...
-     * - If u=0, set u=1.
-     * - If t=0, set t=1.
-     * - Let s=t^2
-     * - Let g=u^3+7
-     * - If g+s=0, set t=2*t, s=4*s
-     * - Let X=(g-s)/(2*t).
-     * - Let Y=(X+t)/(c0*u) = (g+s)/(2*c0*t*u).
-     * - If x3=u+4*Y^2 is a valid x coordinate, return it.
-     * - If x2=(-X/Y-u)/2 is a valid x coordinate, return it.
-     * - Return x1=-(x2+u).
+     * - If u = 0, set u = 1.
+     * - If t = 0, set t = 1.
+     * - Let s = t^2
+     * - Let g = u^3+7
+     * - If g+s = 0, set t = 2*t, s = 4*s
+     * - Let X = (g-s)/(2*t).
+     * - Let Y = (X+t)/(c0*u) = (g+s)/(2*c0*t*u).
+     * - If x3 = u+4*Y^2 is a valid x coordinate, return it.
+     * - If x2 = (-X/Y-u)/2 is a valid x coordinate, return it.
+     * - Return x1 = -(x2+u).
      *
      * Now substitute Y^2 = -(g+s)^2/(12*s*u^2) and X/Y = c0*u*(g-s)/(g+s). This
      * means X and Y do not need to be evaluated explicitly anymore.
      *
      * - ...
-     * - If g+s=0, set s=4*s.
-     * - If x3=u-(g+s)^2/(3*s*u^2) is a valid x coordinate, return it.
-     * - If x2=(-c0*u*(g-s)/(g+s)-u)/2 is a valid x coordinate, return it.
-     * - Return x1=-(x2+u).
+     * - If g+s = 0, set s = 4*s.
+     * - If x3 = u-(g+s)^2/(3*s*u^2) is a valid x coordinate, return it.
+     * - If x2 = (-c0*u*(g-s)/(g+s)-u)/2 is a valid x coordinate, return it.
+     * - Return x1 = -(x2+u).
      *
      * Simplifying x2 using 2 additional constants:
      *
      * - Let c1 = (c0-1)/2 = 0x851695d49a83f8ef919bb86153cbcb16630fb68aed0a766a3ec693d68e6afa40.
      * - Let c2 = (-c0-1)/2 = 0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee.
      * - ...
-     * - If x2=u*(c1*s+c2*g)/(g+s) is a valid x coordinate, return it.
+     * - If x2 = u*(c1*s+c2*g)/(g+s) is a valid x coordinate, return it.
      * - ...
      *
      * Writing x3 as a fraction:
      *
      * - ...
-     * - If x3=(3*s*u^3-(g+s)^2)/(3*s*u^2) ...
+     * - If x3 = (3*s*u^3-(g+s)^2)/(3*s*u^2) ...
      * - ...
 
      * Overall, we get:
      *
      * - Let c1 = 0x851695d49a83f8ef919bb86153cbcb16630fb68aed0a766a3ec693d68e6afa40.
      * - Let c2 = 0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee.
-     * - If u=0, set u=1.
-     * - If t=0, set s=1, else set s=t^2.
-     * - Let g=u^3+7.
-     * - If g+s=0, set s=4*s.
-     * - If x3=(3*s*u^3-(g+s)^2)/(3*s*u^2) is a valid x coordinate, return it.
-     * - If x2=u*(c1*s+c2*g)/(g+s) is a valid x coordinate, return it.
-     * - Return x1=-(x2+u).
+     * - If u = 0, set u = 1.
+     * - If t = 0, set s = 1, else set s = t^2.
+     * - Let g = u^3+7.
+     * - If g+s = 0, set s = 4*s.
+     * - If x3 = (3*s*u^3-(g+s)^2)/(3*s*u^2) is a valid x coordinate, return it.
+     * - If x2 = u*(c1*s+c2*g)/(g+s) is a valid x coordinate, return it.
+     * - Return x1 = -(x2+u).
      */
     secp256k1_fe u1, s, g, p, d, n, l;
     u1 = *u;
@@ -217,7 +217,7 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
         secp256k1_fe_mul(&m, &u, &x); /* m = u*x */
         secp256k1_fe_add(&s, &m); /* s = -(u^2 + u*x + x^2) */
 
-        /* Note that at this point, s=0 is impossible. If it were the case:
+        /* Note that at this point, s = 0 is impossible. If it were the case:
          *             s = -(u^2 + u*x + x^2) = 0
          * =>                 u^2 + u*x + x^2 = 0
          * =>   (u + 2*x) * (u^2 + u*x + x^2) = 0
@@ -278,17 +278,17 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
         /* If (c & 1) = 1 and r = 0, fail. */
         if (EXPECT((c & 1) && secp256k1_fe_normalizes_to_zero_var(&r), 0)) return 0;
 
-        /* If s=0, fail. */
+        /* If s = 0, fail. */
         if (EXPECT(secp256k1_fe_normalizes_to_zero_var(&s), 0)) return 0;
 
-        /* Let v=(r/s-u)/2. */
+        /* Let v = (r/s-u)/2. */
         secp256k1_fe_inv_var(&v, &s); /* v=1/s [cannot be div by 0] */
         secp256k1_fe_mul(&v, &v, &r); /* v=r/s */
         secp256k1_fe_add(&v, &m); /* v=r/s-u */
         secp256k1_fe_half(&v); /* v=(r/s-u)/2 */
     }
 
-    /* Let w=sqrt(s). */
+    /* Let w = sqrt(s). */
     ret = secp256k1_fe_sqrt(&m, &s); /* m = sqrt(s) = w */
     VERIFY_CHECK(ret);
 
