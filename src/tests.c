@@ -63,16 +63,19 @@ static int all_bytes_equal(const void* s, unsigned char value, size_t n) {
 
 /* CHECK that expr_or_stmt calls the error or illegal callback of ctx exactly once
  *
- * For checking functions that use ARG_CHECK_VOID */
+ * Useful for checking functions that return void (e.g., API functions that use ARG_CHECK_VOID) */
 #define CHECK_ERROR_VOID(ctx, expr_or_stmt) \
     CHECK_COUNTING_CALLBACK_VOID(ctx, expr_or_stmt, error_callback, secp256k1_context_set_error_callback)
 #define CHECK_ILLEGAL_VOID(ctx, expr_or_stmt) \
     CHECK_COUNTING_CALLBACK_VOID(ctx, expr_or_stmt, illegal_callback, secp256k1_context_set_illegal_callback)
 
-/* CHECK that expr calls the illegal callback of ctx exactly once and that expr == 0
+/* CHECK that
+ *  - expr calls the illegal callback of ctx exactly once and,
+ *  - expr == 0 (or equivalently, expr == NULL)
  *
- * For checking functions that use ARG_CHECK */
+ * Useful for checking functions that return an integer or a pointer. */
 #define CHECK_ILLEGAL(ctx, expr) CHECK_ILLEGAL_VOID(ctx, CHECK((expr) == 0))
+#define CHECK_ERROR(ctx, expr) CHECK_ERROR_VOID(ctx, CHECK((expr) == 0))
 
 static void counting_callback_fn(const char* str, void* data) {
     /* Dummy callback function that just counts. */
