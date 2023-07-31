@@ -486,8 +486,8 @@ static void run_scratch_tests(void) {
     secp256k1_scratch_space_destroy(CTX, scratch);
     memset(&local_scratch, 0, sizeof(local_scratch));
     scratch = &local_scratch;
-    CHECK_ERROR_VOID(CTX, CHECK(!secp256k1_scratch_max_allocation(&CTX->error_callback, scratch, 0)));
-    CHECK_ERROR_VOID(CTX, CHECK(secp256k1_scratch_alloc(&CTX->error_callback, scratch, 500) == NULL));
+    CHECK_ERROR(CTX, secp256k1_scratch_max_allocation(&CTX->error_callback, scratch, 0));
+    CHECK_ERROR(CTX, secp256k1_scratch_alloc(&CTX->error_callback, scratch, 500));
     CHECK_ERROR_VOID(CTX, secp256k1_scratch_space_destroy(CTX, scratch));
 
     /* Test that large integers do not wrap around in a bad way */
