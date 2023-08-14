@@ -19,14 +19,14 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         gcc-s390x-linux-gnu libc6-dev-s390x-cross libc6-dbg:s390x \
         gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-dbg:armhf \
         gcc-aarch64-linux-gnu libc6-dev-arm64-cross libc6-dbg:arm64 \
-        gcc-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-dbg:ppc64el \
-        sagemath
+        gcc-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-dbg:ppc64el
 
 WORKDIR /root
 
 # Build and install gcc snapshot
 ARG GCC_SNAPSHOT_MAJOR=14
-RUN wget --progress=dot:giga --https-only --recursive --accept '*.tar.xz' --level 1 --no-directories "https://gcc.gnu.org/pub/gcc/snapshots/LATEST-${GCC_SNAPSHOT_MAJOR}" && \
+RUN mkdir gcc && cd gcc && \
+    wget --progress=dot:giga --https-only --recursive --accept '*.tar.xz' --level 1 --no-directories "https://gcc.gnu.org/pub/gcc/snapshots/LATEST-${GCC_SNAPSHOT_MAJOR}" && \
     wget "https://gcc.gnu.org/pub/gcc/snapshots/LATEST-${GCC_SNAPSHOT_MAJOR}/sha512.sum" && \
     sha512sum --check --ignore-missing sha512.sum && \
     # We should have downloaded exactly one tar.xz file
@@ -38,6 +38,9 @@ RUN wget --progress=dot:giga --https-only --recursive --accept '*.tar.xz' --leve
     ../*/configure --prefix=/opt/gcc-snapshot --enable-languages=c --disable-bootstrap --disable-multilib --without-isl && \
     make -j $(nproc) && \
     make install && \
+    apt-get autoremove -y libgmp-dev libmpfr-dev libmpc-dev flex && \
+    apt-get clean && \
+    cd ../.. && rm -rf gcc && \
     ln -s /opt/gcc-snapshot/bin/gcc /usr/bin/gcc-snapshot
 
 # Install clang snapshot
