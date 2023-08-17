@@ -31,13 +31,6 @@ print_environment() {
 }
 print_environment
 
-case "$WRAPPER_CMD" in
-    *wine*)
-        # Make sure to shutdown wineserver whenever we exit.
-        trap "wineserver -k || true" EXIT INT HUP
-        ;;
-esac
-
 env >> test_env.log
 
 # If gcc is requested, assert that it's in fact gcc (and not some symlinked Apple clang).

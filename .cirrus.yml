@@ -236,7 +236,6 @@ task:
       env:
         HOST: i686-w64-mingw32
   test_script:
-    - wineboot --init
     - ./ci/cirrus.sh
   << : *CAT_LOGS
 
