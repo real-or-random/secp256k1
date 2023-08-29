@@ -531,7 +531,7 @@ static int secp256k1_ecdsa_sign_inner(const secp256k1_context* ctx, secp256k1_sc
         if (is_nonce_valid) {
             ret = secp256k1_ecdsa_sig_sign(&ctx->ecmult_gen_ctx, r, s, &sec, &msg, &non, recid);
             /* The final signature is no longer a secret, nor is the fact that we were successful or not. */
-            secp256k1_declassify(ctx, &ret, sizeof(ret));
+            /* secp256k1_declassify(ctx, &ret, sizeof(ret)); */
             if (ret) {
                 break;
             }
