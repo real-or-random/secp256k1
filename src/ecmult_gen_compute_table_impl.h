@@ -22,7 +22,7 @@ static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, cons
     secp256k1_gej* vs = checked_malloc(&default_error_callback, points_total * sizeof(*vs));
     secp256k1_gej u;
     size_t vs_pos = 0;
-    secp256k1_scalar half;
+    secp256k1_scalar half = secp256k1_scalar_zero;
     int block, i;
 
     /* u is the running power of two times gen we're working with, initially gen/2. */
