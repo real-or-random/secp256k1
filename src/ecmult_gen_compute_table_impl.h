@@ -25,6 +25,8 @@ static void secp256k1_ecmult_gen_compute_table(secp256k1_ge_storage* table, cons
     secp256k1_scalar half = secp256k1_scalar_zero;
     int block, i;
 
+    VERIFY_CHECK(points_total > 0);
+
     /* u is the running power of two times gen we're working with, initially gen/2. */
     secp256k1_scalar_half(&half, &secp256k1_scalar_one);
     secp256k1_gej_set_infinity(&u);
