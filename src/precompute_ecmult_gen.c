@@ -32,7 +32,7 @@ static void print_table(FILE* fp, int blocks, int teeth) {
     secp256k1_ge_storage* table = checked_malloc(&default_error_callback, blocks * points * sizeof(secp256k1_ge_storage));
     secp256k1_ecmult_gen_compute_table(table, &secp256k1_ge_const_g, blocks, teeth, spacing);
 
-    fprintf(fp, "#if (COMB_BLOCKS == %d) && (COMB_TEETH == %d) && (COMB_SPACING == %d)\n", blocks, teeth, spacing);
+    fprintf(fp, "#elif (COMB_BLOCKS == %d) && (COMB_TEETH == %d) && (COMB_SPACING == %d)\n", blocks, teeth, spacing);
     for (outer = 0; outer != blocks; outer++) {
         fprintf(fp,"{");
         for (inner = 0; inner != points; inner++) {
@@ -49,7 +49,6 @@ static void print_table(FILE* fp, int blocks, int teeth) {
             fprintf(fp,"}\n");
         }
     }
-    fprintf(fp, "#endif\n");
     free(table);
 }
 
@@ -77,8 +76,9 @@ int main(int argc, char **argv) {
     fprintf(fp, "#    error Cannot compile precomputed_ecmult_gen.c in exhaustive test mode\n");
     fprintf(fp, "#endif /* EXHAUSTIVE_TEST_ORDER */\n");
     fprintf(fp, "#define S(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) SECP256K1_GE_STORAGE_CONST(0x##a##u,0x##b##u,0x##c##u,0x##d##u,0x##e##u,0x##f##u,0x##g##u,0x##h##u,0x##i##u,0x##j##u,0x##k##u,0x##l##u,0x##m##u,0x##n##u,0x##o##u,0x##p##u)\n");
-    fprintf(fp, "const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[COMB_BLOCKS][COMB_POINTS] = {\n");
 
+    fprintf(fp, "const secp256k1_ge_storage secp256k1_ecmult_gen_prec_table[COMB_BLOCKS][COMB_POINTS] = {\n");
+    fprintf(fp, "#if 0\n");
     for (config = 0; config < sizeof(CONFIGS) / sizeof(*CONFIGS); ++config) {
         print_table(fp, CONFIGS[config][0], CONFIGS[config][1]);
         if (CONFIGS[config][0] == COMB_BLOCKS && CONFIGS[config][1] == COMB_TEETH) {
@@ -88,6 +88,9 @@ int main(int argc, char **argv) {
     if (!did_current_config) {
         print_table(fp, COMB_BLOCKS, COMB_TEETH);
     }
+    fprintf(fp, "#else\n");
+    fprintf(fp, "#    error Configuration mismatch, invalid COMB_* parameters. Try deleting precomputed_ecmult_gen.c before the build.\n");
+    fprintf(fp, "#endif\n");
 
     fprintf(fp, "};\n");
     fprintf(fp, "#undef S\n");
