@@ -15,9 +15,11 @@
  *
  * - COMB_BLOCKS is the number of blocks the input is split into. Each has a corresponding table.
  * - COMB_TEETH is the number of bits simultaneously covered by one table.
+ * - FIXME describe COMB_RANGE
  * - COMB_SPACING is the distance between the teeth. For production purposes, the only reasonable
- *   value is ceil(256 / (COMB_BLOCKS * COMB_TEETH)), so unless explicitly configured otherwise,
- *   that value will be used. COMB_BLOCKS * COMB_TEETH * COMB_SPACING needs to be at least 256.
+ *   value is ceil(COMB_RANGE / (COMB_BLOCKS * COMB_TEETH)), so unless explicitly configured
+ *   otherwise, that value will be used. COMB_BLOCKS * COMB_TEETH * COMB_SPACING needs to be at
+ *   least COMB_RANGE.
  *
  * The size of the precomputed table is COMB_BLOCKS * (1 << (COMB_TEETH - 1))
  * secp256k1_ge_storages.
