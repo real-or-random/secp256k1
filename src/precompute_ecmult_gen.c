@@ -24,7 +24,7 @@ static const int CONFIGS[][2] = {
 };
 
 static void print_table(FILE* fp, int blocks, int teeth) {
-    int spacing = (255 + blocks * teeth) / (blocks * teeth);
+    int spacing = CEIL_DIV(256, blocks * teeth);
     size_t points = ((size_t)1) << (teeth - 1);
     int outer;
     size_t inner;
