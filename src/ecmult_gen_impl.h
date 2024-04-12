@@ -188,7 +188,6 @@ static void secp256k1_ecmult_gen(const secp256k1_ecmult_gen_context *ctx, secp25
      * secp256k1_ecmult_gen_prec_table[b][index] stores the table(b, m) entries. Index
      * is the relevant mask(b) bits of m packed together without gaps. */
 
-    secp256k1_gej_set_infinity(r);
     /* Outer loop: iterate over comb_off from COMB_SPACING - 1 down to 0. */
     comb_off = COMB_SPACING - 1;
     while (1) {
