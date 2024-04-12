@@ -70,7 +70,7 @@
 #endif
 /* Use ceil(COMB_RANGE / (COMB_BLOCKS * COMB_TEETH)) as default COMB_SPACING. */
 #ifndef COMB_SPACING
-#  define COMB_SPACING ((COMB_RANGE + COMB_BLOCKS * COMB_TEETH) / (COMB_BLOCKS * COMB_TEETH))
+#  define COMB_SPACING ((COMB_RANGE + COMB_BLOCKS * COMB_TEETH - 1) / (COMB_BLOCKS * COMB_TEETH))
 #  ifdef DEBUG_CONFIG
 #    pragma message DEBUG_CONFIG_MSG("COMB_SPACING undefined, assuming default value")
 #  endif
