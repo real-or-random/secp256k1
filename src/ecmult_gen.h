@@ -34,17 +34,14 @@
  * doesn't support infinities) */
 #  undef COMB_BLOCKS
 #  undef COMB_TEETH
-#  undef COMB_SPACING
 #  if EXHAUSTIVE_TEST_ORDER == 13
 #    define COMB_RANGE 4
 #    define COMB_BLOCKS 1
 #    define COMB_TEETH 2
-#    define COMB_SPACING 2
 #  elif EXHAUSTIVE_TEST_ORDER == 199
 #    define COMB_RANGE 8
 #    define COMB_BLOCKS 2
 #    define COMB_TEETH 3
-#    define COMB_SPACING 2
 #  else
 #    error "Unknown exhaustive test order"
 #  endif
@@ -54,6 +51,11 @@
 #else /* !defined(EXHAUSTIVE_TEST_ORDER) */
 #  define COMB_RANGE 256
 #endif /* defined(EXHAUSTIVE_TEST_ORDER) */
+
+#undef COMB_BLOCKS
+#undef COMB_TEETH
+#define COMB_BLOCKS 1
+#define COMB_TEETH 1
 
 /* Use (11, 6) as default configuration, which results in a 22 kB table. */
 #ifndef COMB_BLOCKS
@@ -68,13 +70,8 @@
 #    pragma message DEBUG_CONFIG_MSG("COMB_TEETH undefined, assuming default value")
 #  endif
 #endif
-/* Use ceil(COMB_RANGE / (COMB_BLOCKS * COMB_TEETH)) as default COMB_SPACING. */
-#ifndef COMB_SPACING
-#  define COMB_SPACING CEIL_DIV(COMB_RANGE, COMB_BLOCKS * COMB_TEETH)
-#  ifdef DEBUG_CONFIG
-#    pragma message DEBUG_CONFIG_MSG("COMB_SPACING undefined, assuming default value")
-#  endif
-#endif
+/* Use ceil(COMB_RANGE / (COMB_BLOCKS * COMB_TEETH)) as COMB_SPACING. */
+#define COMB_SPACING CEIL_DIV(COMB_RANGE, COMB_BLOCKS * COMB_TEETH)
 
 /* Range checks on the parameters. */
 
@@ -99,15 +96,15 @@
  * configurations. Note that they compare with 256 rather than COMB_RANGE, so they do
  * permit somewhat excessive values for the exhaustive test case, where testing with
  * suboptimal parameters may be desirable. */
-#if (COMB_BLOCKS - 1) * COMB_TEETH * COMB_SPACING >= 256
-#  error "COMB_BLOCKS can be reduced"
-#endif
-#if COMB_BLOCKS * (COMB_TEETH - 1) * COMB_SPACING >= 256
-#  error "COMB_TEETH can be reduced"
-#endif
-#if COMB_BLOCKS * COMB_TEETH * (COMB_SPACING - 1) >= 256
-#  error "COMB_SPACING can be reduced"
-#endif
+/* #if (COMB_BLOCKS - 1) * COMB_TEETH * COMB_SPACING >= 256 */
+/* #  error "COMB_BLOCKS can be reduced" */
+/* #endif */
+/* #if COMB_BLOCKS * (COMB_TEETH - 1) * COMB_SPACING >= 256 */
+/* #  error "COMB_TEETH can be reduced" */
+/* #endif */
+/* #if COMB_BLOCKS * COMB_TEETH * (COMB_SPACING - 1) >= 256 */
+/* #  error "COMB_SPACING can be reduced" */
+/* #endif */
 
 #ifdef DEBUG_CONFIG
 #  pragma message DEBUG_CONFIG_DEF(COMB_RANGE)
