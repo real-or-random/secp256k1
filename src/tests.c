@@ -6607,6 +6607,18 @@ static void run_pubkey_comparison(void) {
     CHECK(secp256k1_ec_pubkey_cmp(CTX, &pk2, &pk1) > 0);
 }
 
+static void test_heap_swap(void) {
+    unsigned char a[600];
+    unsigned char e[sizeof(a)];
+    memset(a,       21, 200);
+    memset(a + 200, 99, 200);
+    memset(a + 400, 42, 200);
+    memset(e,       42, 200);
+    memset(e + 200, 99, 200);
+    memset(e + 400, 21, 200);
+    secp256k1_heap_swap(a, 0, 2, 200);
+    CHECK(secp256k1_memcmp_var(a, e, sizeof(a)) == 0);
+}
 
 static void test_hsort_is_sorted(int *ints, size_t n) {
     size_t i;
@@ -6801,6 +6813,7 @@ static void run_pubkey_sort(void) {
     test_sort_api();
     test_sort();
     test_sort_vectors();
+    test_heap_swap();
 }
 
 
