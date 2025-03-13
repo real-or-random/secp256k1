@@ -101,7 +101,7 @@ const unsigned char* label_lookup(
     const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;
     size_t i;
     for (i = 0; i < cache->entries_used; i++) {
-        if (memcmp(cache->entries[i].label, label33, 33) == 0) {
+        if (secp256k1_memcmp_var(cache->entries[i].label, label33, 33) == 0) {
             return cache->entries[i].label_tweak;
         }
     }
