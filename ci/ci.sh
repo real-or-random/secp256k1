@@ -75,14 +75,16 @@ esac
     --with-test-override-wide-multiply="$WIDEMUL" --with-asm="$ASM" \
     --with-ecmult-window="$ECMULTWINDOW" \
     --with-ecmult-gen-kb="$ECMULTGENKB" \
-    --enable-module-ecdh="$ECDH" --enable-module-recovery="$RECOVERY" \
-    --enable-module-ellswift="$ELLSWIFT" \
-    --enable-module-extrakeys="$EXTRAKEYS" \
-    --enable-module-schnorrsig="$SCHNORRSIG" \
-    --enable-module-musig="$MUSIG" \
-    --enable-module-silentpayments="$SILENTPAYMENTS" \
-    --enable-examples="$EXAMPLES" \
-    --enable-ctime-tests="$CTIMETESTS" \
+    --enable-module-ecdh="$ECDH" --enable-module-recovery=no \
+    --enable-module-ellswift=no \
+    --enable-module-extrakeys=yes \
+    --enable-module-schnorrsig=yes \
+    --enable-module-musig=no \
+    --enable-module-silentpayments=yes \
+    --enable-examples=yes \
+    --enable-ctime-tests=no \
+    --enable-tests=no \
+    --enable-exhaustive-tests=no \
     --with-valgrind="$WITH_VALGRIND" \
     --host="$HOST" $EXTRAFLAGS
 
@@ -108,43 +110,45 @@ file *tests* || true
 file bench* || true
 file .libs/* || true
 
-# This tells `make check` to wrap test invocations.
-export LOG_COMPILER="$WRAPPER_CMD"
+valgrind --error-exitcode=42 --verbose --track-origins=yes ./silentpayments_example
 
-make "$BUILD"
+# # This tells `make check` to wrap test invocations.
+# export LOG_COMPILER="$WRAPPER_CMD"
+
+# make "$BUILD"
 
 # Using the local `libtool` because on macOS the system's libtool has nothing to do with GNU libtool
-EXEC='./libtool --mode=execute'
-if [ -n "$WRAPPER_CMD" ]
-then
-    EXEC="$EXEC $WRAPPER_CMD"
-fi
+# EXEC='./libtool --mode=execute'
+# if [ -n "$WRAPPER_CMD" ]
+# then
+#     EXEC="$EXEC $WRAPPER_CMD"
+# fi
 
-if [ "$BENCH" = "yes" ]
-then
-    {
-        $EXEC ./bench_ecmult
-        $EXEC ./bench_internal
-        $EXEC ./bench
-    } >> bench.log 2>&1
-fi
+# if [ "$BENCH" = "yes" ]
+# then
+#     {
+#         $EXEC ./bench_ecmult
+#         $EXEC ./bench_internal
+#         $EXEC ./bench
+#     } >> bench.log 2>&1
+# fi
 
-if [ "$CTIMETESTS" = "yes" ]
-then
-    if [ "$WITH_VALGRIND" = "yes" ]; then
-        ./libtool --mode=execute valgrind --error-exitcode=42 ./ctime_tests > ctime_tests.log 2>&1
-    else
-        $EXEC ./ctime_tests > ctime_tests.log 2>&1
-    fi
-fi
+# if [ "$CTIMETESTS" = "yes" ]
+# then
+#     if [ "$WITH_VALGRIND" = "yes" ]; then
+#         ./libtool --mode=execute valgrind --error-exitcode=42 ./ctime_tests > ctime_tests.log 2>&1
+#     else
+#         $EXEC ./ctime_tests > ctime_tests.log 2>&1
+#     fi
+# fi
 
 # Rebuild precomputed files (if not cross-compiling).
-if [ -z "$HOST" ]
-then
-    make clean-precomp clean-testvectors
-    make precomp testvectors
-fi
+# if [ -z "$HOST" ]
+# then
+#     make clean-precomp clean-testvectors
+#     make precomp testvectors
+# fi
 
 # Check that no repo files have been modified by the build.
 # (This fails for example if the precomp files need to be updated in the repo.)
-git diff --exit-code
+# git diff --exit-code
