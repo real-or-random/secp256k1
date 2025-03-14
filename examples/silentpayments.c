@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <valgrind/memcheck.h>
 
 #include <secp256k1_extrakeys.h>
 #include <secp256k1_silentpayments.h>
@@ -100,7 +101,7 @@ const unsigned char* label_lookup(
 ) {
     const struct labels_cache* cache = (const struct labels_cache*)cache_ptr;
     size_t i;
-    for (i = 0; i < cache->entries_used; i++) {
+    for (i = 0; i < cache->entries_used; i++) {printf("lhs: %lu\n", VALGRIND_CHECK_MEM_IS_DEFINED(&cache->entries[i], sizeof(struct label_cache_entry))); printf("rhs: %lu\n", VALGRIND_CHECK_MEM_IS_DEFINED(label33, 33));
         if (memcmp(cache->entries[i].label, label33, 33) == 0) {
             return cache->entries[i].label_tweak;
         }

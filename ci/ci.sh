@@ -90,7 +90,7 @@ esac
 
 # We have set "-j<n>" in MAKEFLAGS.
 build_exit_code=0
-make > make.log 2>&1 || build_exit_code=$?
+make CFLAGS="-Wno-error" > make.log 2>&1 || build_exit_code=$?
 cat make.log
 if [ $build_exit_code -ne 0 ]; then
     case "${CC:-undefined}" in
