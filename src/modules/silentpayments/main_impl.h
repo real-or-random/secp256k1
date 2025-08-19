@@ -192,7 +192,7 @@ int secp256k1_silentpayments_sender_create_outputs(
     unsigned char shared_secret[33];
     secp256k1_pubkey current_scan_pubkey;
     int overflow = 0;
-    int ret;
+    int ret, sum_is_zero;
 
     /* Sanity check inputs. */
     VERIFY_CHECK(ctx != NULL);
@@ -246,13 +246,13 @@ int secp256k1_silentpayments_sender_create_outputs(
         secp256k1_scalar_add(&a_sum_scalar, &a_sum_scalar, &addend);
     }
     /* If there are any failures in loading/summing up the secret keys, fail early */
-    ret = secp256k1_scalar_is_zero(&a_sum_scalar);
-    secp256k1_declassify(ctx, &ret, sizeof(ret));
+    sum_is_zero = secp256k1_scalar_is_zero(&a_sum_scalar);
+    secp256k1_declassify(ctx, &sum_is_zero, sizeof(sum_is_zero));
     /* Clear the addend variable as this is no longer needed at this point
      * and contains secret data. This saves from needing to remember to clear
      * this variable from multiple places below */
     secp256k1_scalar_clear(&addend);
-    if (ret) {
+    if (sum_is_zero) {
         secp256k1_scalar_clear(&a_sum_scalar);
         return 0;
     }
