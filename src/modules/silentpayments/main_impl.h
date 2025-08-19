@@ -67,8 +67,11 @@ static void secp256k1_silentpayments_calculate_input_hash(unsigned char *input_h
     secp256k1_silentpayments_sha256_init_inputs(&hash);
     secp256k1_sha256_write(&hash, outpoint_smallest36, 36);
     ret = secp256k1_eckey_pubkey_serialize(pubkey_sum, pubkey_sum_ser, &len, 1);
+#ifdef VERFIY
     VERIFY_CHECK(ret && len == sizeof(pubkey_sum_ser));
+#else
     (void)ret;
+#endif
     secp256k1_sha256_write(&hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));
     secp256k1_sha256_finalize(&hash, input_hash);
 }
@@ -88,8 +91,11 @@ static void secp256k1_silentpayments_create_shared_secret(const secp256k1_contex
      * the secret key being used
      */
     ret = secp256k1_eckey_pubkey_serialize(&ss, shared_secret33, &len, 1);
+#ifdef VERIFY
     VERIFY_CHECK(ret && len == 33);
+#else
     (void)ret;
+#endif
     /* While not technically "secret" data, explicitly clear the shared secret since leaking this would allow an attacker
      * to identify the resulting transaction as a silent payments transaction and potentially link the transaction
      * back to the silent payment address
@@ -508,8 +514,11 @@ int secp256k1_silentpayments_recipient_public_data_serialize(const secp256k1_con
     secp256k1_scalar_set_b32(&input_hash_scalar, &public_data->data[5 + 64], NULL);
     ret = secp256k1_eckey_pubkey_tweak_mul(&ge, &input_hash_scalar);
     ret &= secp256k1_eckey_pubkey_serialize(&ge, output33, &pubkeylen, 1);
+#ifdef VERIFY
     VERIFY_CHECK(ret && pubkeylen == 33);
+#else
     (void)ret;
+#endif
     return 1;
 }
 
