@@ -95,10 +95,8 @@ static void secp256k1_silentpayments_create_shared_secret(const secp256k1_contex
 #else
     (void)ret;
 #endif
-    /* While not technically "secret" data, explicitly clear the shared secret since leaking this would allow an attacker
-     * to identify the resulting transaction as a silent payments transaction and potentially link the transaction
-     * back to the silent payment address
-     */
+
+    /* Leaking these values would break indistiguishability of the transaction, so clear them. */
     secp256k1_ge_clear(&ss);
     secp256k1_gej_clear(&ss_j);
 }
@@ -133,10 +131,7 @@ static void secp256k1_silentpayments_create_t_k(secp256k1_scalar *t_k_scalar, co
     secp256k1_scalar_set_b32(t_k_scalar, hash_ser, &overflow);
     VERIFY_CHECK(!overflow);
     VERIFY_CHECK(!secp256k1_scalar_is_zero(t_k_scalar));
-    /* While not technically "secret" data, explicitly clear hash and hash_ser since leaking this would allow an attacker
-     * to identify the resulting transaction as a silent payments transaction and potentially link the transaction
-     * back to the silent payment address
-     */
+    /* Leaking this value would break indistiguishability of the transaction, so clear it. */
     secp256k1_memclear(hash_ser, sizeof(hash_ser));
     secp256k1_sha256_clear(&hash);
 }
@@ -164,10 +159,7 @@ static int secp256k1_silentpayments_create_output_pubkey(const secp256k1_context
     };
     secp256k1_xonly_pubkey_save(output_xonly, &output_ge);
 
-    /* While not technically "secret" data, explicitly clear t_k since leaking this would allow an attacker
-     * to identify the resulting transaction as a silent payments transaction and potentially link the transaction
-     * back to the silent payment address
-     */
+    /* Leaking this value would break indistiguishability of the transaction, so clear it. */
     secp256k1_scalar_clear(&t_k_scalar);
     return 1;
 }
@@ -286,12 +278,9 @@ int secp256k1_silentpayments_sender_create_outputs(
              */
             secp256k1_ge pk;
             if (!secp256k1_pubkey_load(ctx, &pk, &recipients[i]->scan_pubkey)) {
-                /* Explicitly clear variables containing secret data before returning (here and below).
-                 * While technically not "secret data," explicitly clear the shared secret since leaking this
-                 * could result in a third party being able to identify the transaction as a silent payments transaction
-                 * and potentially link the transaction back to a silent payment address.
-                 */
+                /* Explicitly clear variables containing secret data before returning (here and below). */
                 secp256k1_scalar_clear(&a_sum_scalar);
+                /* Leaking this value would break indistiguishability of the transaction, so clear it. */
                 secp256k1_memclear(&shared_secret, sizeof(shared_secret));
                 return 0;
             }
