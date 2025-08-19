@@ -29,7 +29,6 @@ static int secp256k1_silentpayments_recipient_sort_cmp(const void* pk1, const vo
 }
 
 static void secp256k1_silentpayments_recipient_sort(const secp256k1_context* ctx, const secp256k1_silentpayments_recipient **recipients, size_t n_recipients) {
-
     /* Suppress wrong warning (fixed in MSVC 19.33) */
     #if defined(_MSC_VER) && (_MSC_VER < 1933)
     #pragma warning(push)
@@ -155,8 +154,9 @@ static int secp256k1_silentpayments_create_output_pubkey(const secp256k1_context
         secp256k1_scalar_clear(&t_k_scalar);
         return 0;
     }
-    /* `tweak_add` only fails if t_k_scalar is equal to the dlog of -output_ge, but t_k_scalar is the output of a collision resistant hash function.
-     * This will never happen under normal usage, but we handle this error to anyways to protect against this function being called with a malicious
+    /* `tweak_add` only fails if t_k*G = -B_spend. But since t_k is the output of a hash function,
+     * this will happen only with negligible probability for honestly created B_spend, but we handle this
+     * error anyway to protect against this function being called with a malicious
      * B_spend argument, i.e., B_spend = -(_create_t_k(shared_secret33, k))*G
      */
     if (!secp256k1_eckey_pubkey_tweak_add(&output_ge, &t_k_scalar)) {
@@ -262,8 +262,8 @@ int secp256k1_silentpayments_sender_create_outputs(
     secp256k1_declassify(ctx, &A_sum_ge, sizeof(A_sum_ge));
 
     /* Calculate the input hash and tweak a_sum, i.e., a_sum_tweaked = a_sum * input_hash
-     * This should fail if input hash is greater than the curve order, but this is stastically improbable so
-     * we only do a verify_check here.
+     * This should fail if input hash is greater than the curve order, but this happens only
+     * with negligible probability, so we only do a VERIFY_CHECK here.
      */
     secp256k1_silentpayments_calculate_input_hash(input_hash, outpoint_smallest36, &A_sum_ge);
     secp256k1_scalar_set_b32(&input_hash_scalar, input_hash, &overflow);
