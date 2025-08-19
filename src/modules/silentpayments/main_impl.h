@@ -278,7 +278,6 @@ int secp256k1_silentpayments_sender_create_outputs(
              */
             secp256k1_ge pk;
             if (!secp256k1_pubkey_load(ctx, &pk, &recipients[i]->scan_pubkey)) {
-                /* Explicitly clear variables containing secret data before returning (here and below). */
                 secp256k1_scalar_clear(&a_sum_scalar);
                 /* Leaking this value would break indistiguishability of the transaction, so clear it. */
                 secp256k1_memclear(&shared_secret, sizeof(shared_secret));
