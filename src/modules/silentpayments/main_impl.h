@@ -248,15 +248,13 @@ int secp256k1_silentpayments_sender_create_outputs(
     /* If there are any failures in loading/summing up the secret keys, fail early */
     ret = secp256k1_scalar_is_zero(&a_sum_scalar);
     secp256k1_declassify(ctx, &ret, sizeof(ret));
+    /* Clear the addend variable as this is no longer needed at this point
+     * and contains secret data. This saves from needing to remember to clear
+     * this variable from multiple places below */
+    secp256k1_scalar_clear(&addend);
     if (ret) {
-        secp256k1_scalar_clear(&addend);
         secp256k1_scalar_clear(&a_sum_scalar);
         return 0;
-    } else {
-        /* Clear the addend variable as this is no longer needed at this point
-         * and contains secret data. This saves from needing to remember to clear
-         * this variable from multiple places below */
-        secp256k1_scalar_clear(&addend);
     }
     /* Compute input_hash = hash(outpoint_L || (a_sum * G)) */
     secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &A_sum_gej, &a_sum_scalar);
