@@ -10,6 +10,14 @@
 #include "../../../include/secp256k1_extrakeys.h"
 #include "../../../include/secp256k1_silentpayments.h"
 
+#include "../../eckey.h"
+#include "../../ecmult.h"
+#include "../../ecmult_const.h"
+#include "../../ecmult_gen.h"
+#include "../../group.h"
+#include "../../hash.h"
+#include "../../hsort.h"
+
 /** Sort an array of silent payment recipients. This is used to group recipients by scan pubkey to
  *  ensure the correct values of k are used when creating multiple outputs for a recipient.
  */
