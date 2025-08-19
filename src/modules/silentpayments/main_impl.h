@@ -141,14 +141,13 @@ static void secp256k1_silentpayments_create_t_k(secp256k1_scalar *t_k_scalar, co
     secp256k1_sha256_clear(&hash);
 }
 
+/** Calculate and return output_xonly = B_spend + t_k * G.
+ *
+ * This will fail (return 0) if B_spend or B_spend + t_k*G is the point at infinity.
+ */
 static int secp256k1_silentpayments_create_output_pubkey(const secp256k1_context *ctx, secp256k1_xonly_pubkey *output_xonly, const unsigned char *shared_secret33, const secp256k1_pubkey *recipient_spend_pubkey, uint32_t k) {
     secp256k1_ge output_ge;
     secp256k1_scalar t_k_scalar;
-
-    /* Calculate and return output_xonly = B_spend + t_k * G
-     * This will fail if B_spend is the point at infinity or if
-     * B_spend + t_k*G is the point at infinity.
-     */
     secp256k1_silentpayments_create_t_k(&t_k_scalar, shared_secret33, k);
     if (!secp256k1_pubkey_load(ctx, &output_ge, recipient_spend_pubkey)) {
         secp256k1_scalar_clear(&t_k_scalar);
