@@ -277,7 +277,7 @@ int secp256k1_silentpayments_sender_create_outputs(
      */
     secp256k1_silentpayments_recipient_sort(ctx, recipients, n_recipients);
     current_scan_pubkey = recipients[0]->scan_pubkey;
-    k = 0;
+    k = 0;  /* This is a dead store but clang will emit a false positive warning if we omit it. */
     for (i = 0; i < n_recipients; i++) {
         if ((i == 0) || (secp256k1_ec_pubkey_cmp(ctx, &current_scan_pubkey, &recipients[i]->scan_pubkey) != 0)) {
             /* If we are on a different scan pubkey, its time to recreate the shared secret and reset k to 0.
