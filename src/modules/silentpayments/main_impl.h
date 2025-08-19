@@ -588,8 +588,8 @@ int secp256k1_silentpayments_recipient_scan_outputs(
         secp256k1_silentpayments_create_t_k(&t_k_scalar, shared_secret, k);
 
         /* Calculate P_output = B_spend + t_k * G
-         * This can fail if t_k is the negation of B_spend, but this is statistically
-         * improbable as t_k is the output of a hash function. */
+         * This can fail if t_k is the negation of B_spend, but this happens only
+         * with negligible probability as t_k is the output of a hash function. */
         ret = secp256k1_eckey_pubkey_tweak_add(&P_output_ge, &t_k_scalar);
         VERIFY_CHECK(ret);
         found = 0;
