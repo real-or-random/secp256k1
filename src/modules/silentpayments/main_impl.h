@@ -468,8 +468,8 @@ int secp256k1_silentpayments_recipient_public_data_create(
     /* Convert input_hash to a scalar to ensure the value is less than the curve order.
      *
      * This can only fail if the output of the hash function is greater than the curve order, which
-     * is statistically improbable. We use a VERIFY_CHECK as opposed to reruning an error, since returning an
-     * error here would result in an untestable branch in the code.
+     * happens with negligible probability. We use a VERIFY_CHECK as opposed to reruning an error,
+     * since returning an error here would result in an untestable branch in the code.
      */
     secp256k1_scalar_set_b32(&input_hash_scalar, input_hash_local, &overflow);
     VERIFY_CHECK(!overflow);
