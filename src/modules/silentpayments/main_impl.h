@@ -558,13 +558,10 @@ int secp256k1_silentpayments_recipient_scan_outputs(
     if (label_context != NULL) {
         ARG_CHECK(label_lookup != NULL);
     }
-    /* Recall: a scan key isnt really "secret" data in that leaking the scan key will only leak privacy.
-     *
-     * However, if there is something wrong with the recipient scan key, recipient spend pubkey, or the public data,
-     * we fail early and make sure to clear the scan key from memory. */
     ret = secp256k1_scalar_set_b32_seckey(&rsk_scalar, recipient_scan_key32);
     secp256k1_declassify(ctx, &ret, sizeof(ret));
     if (!ret) {
+        /* Leaking this value would break indistiguishability of the transaction, so clear it. */
         secp256k1_scalar_clear(&rsk_scalar);
         return 0;
     }
@@ -672,14 +669,9 @@ int secp256k1_silentpayments_recipient_scan_outputs(
         }
     }
     *n_found_outputs = n_found;
-    /* Explicitly clear secrets. Recall that the scan key is not quite "secret" in that leaking the scan key
-     * results in a loss of privacy, not a loss of funds
-     */
+
+    /* Leaking these values would break indistiguishability of the transaction, so clear them. */
     secp256k1_scalar_clear(&rsk_scalar);
-    /* Explicitly clear the shared secret. While this isn't technically "secret data," any third party
-     * with access to the shared secret could potentially identify and link the transaction back to the
-     * recipient address
-     */
     secp256k1_scalar_clear(&t_k_scalar);
     secp256k1_memclear(shared_secret, sizeof(shared_secret));
     return ret;
@@ -704,7 +696,6 @@ int secp256k1_silentpayments_recipient_create_shared_secret(const secp256k1_cont
     }
     secp256k1_silentpayments_create_shared_secret(ctx, shared_secret33, &rsk, &A_tweaked_ge);
 
-    /* Explicitly clear secrets */
     secp256k1_scalar_clear(&rsk);
     return 1;
 }
