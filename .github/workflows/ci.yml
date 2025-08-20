@@ -17,7 +17,7 @@ env:
   WRAPPER_CMD: 'valgrind --error-exitcode=42'
   # Specific warnings can be disabled with -Wno-error=foo.
   # -pedantic-errors is not equivalent to -Werror=pedantic and thus not implied by -Werror according to the GCC manual.
-  WERROR_CFLAGS: '-Werror -pedantic-errors'
+  WERROR_CFLAGS: '-Werror -pedantic-errors -fno-builtin-memcmp'
   MAKEFLAGS: '-j4'
   BUILD: 'check'
   ### secp256k1 config
