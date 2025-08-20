@@ -129,30 +129,7 @@ int main(void) {
     }
 
     /* Actual public key and recovered public key should match */
-    return_val = my_memcmp_var(serialized_pubkey, serialized_recovered_pubkey, sizeof(serialized_pubkey));
+    return_val = memcmp(serialized_pubkey, serialized_recovered_pubkey, sizeof(serialized_pubkey));
     assert(return_val == 0);
-
-    printf("     Secret Key: ");
-    print_hex(seckey, sizeof(seckey));
-    printf("     Public Key: ");
-    print_hex(serialized_pubkey, sizeof(serialized_pubkey));
-    printf(" Rec. signature: ");
-    print_hex(recoverable_sig_ser, sizeof(recoverable_sig_ser));
-    printf("    Recovery id: %d\n", recovery_id);
-    printf("Rec. public key: ");
-    print_hex(serialized_recovered_pubkey, sizeof(serialized_recovered_pubkey));
-
-    /* This will clear everything from the context and free the memory */
-    secp256k1_context_destroy(ctx);
-
-    /* It's best practice to try to clear secrets from memory after using them.
-     * This is done because some bugs can allow an attacker to leak memory, for
-     * example through "out of bounds" array access (see Heartbleed), or the OS
-     * swapping them to disk. Hence, we overwrite the secret key buffer with zeros.
-     *
-     * Here we are preventing these writes from being optimized out, as any good compiler
-     * will remove any writes that aren't used. */
-    secure_erase(seckey, sizeof(seckey));
-
     return EXIT_SUCCESS;
 }
