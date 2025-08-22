@@ -540,7 +540,7 @@ jobs:
           ln -s $(brew --prefix gcc)/bin/gcc-?? /usr/local/bin/gcc
 
       - name: Install and cache Valgrind
-        uses: ./.github/actions/install-homebrew-valgrind
+        uses: ./.github/actions/install-valgrind-macos
 
       - name: CI script
         env: ${{ matrix.env_vars }}

@@ -1,0 +1,32 @@
+name: "Install Valgrind for macOS"
+description: "Fetch, build, cache, and install Valgrind for macOS."
+runs:
+  using: "composite"
+  steps:
+    - name: Clone the repository
+    - run: |
+        git clone https://github.com/LouisBrunner/valgrind-macos
+      shell: bash
+
+    - name: Build
+    - run: |
+        cd valgrind-macos && ./autogen.sh && ./configure && make && cd ..
+      shell: bash
+
+    - name: Create a cache fingerprint
+    - run: |
+        sw_vers > valgrind_fingerprint
+        git -C "valgrind-macos" rev-parse HEAD >> valgrind_fingerprint
+        cat valgrind_fingerprint
+      shell: bash
+
+    - uses: actions/cache@v4
+      id: cache
+      with:
+        path: valgrind-macos
+        key: ${{ github.job }}-valgrind-${{ hashFiles('valgrind_fingerprint') }}
+
+    - name: Install
+    - run: |
+        cd valgrind-macos && sudo make install
+      shell: bash
