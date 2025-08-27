@@ -104,40 +104,36 @@ def to_c_array(x):
     return "{0x" + s + "}"
 
 def gen_key_material(comment, keys, include_count=False):
+    assert len(keys) <= MAX_INPUTS_PER_TEST_CASE
     out = ""
     if include_count:
         out += f"        {len(keys)}," + "\n"
     out += f"        {{ /* {comment} */" + "\n"
-    assert len(keys) <= MAX_INPUTS_PER_TEST_CASE
-    for i in range(MAX_INPUTS_PER_TEST_CASE):
-        out += "            "
-        if i < len(keys):
-            out += to_c_array(keys[i])
-        else:
-            out += '""'
-        out += ",\n"
+    for k in keys:
+        out += f"            {to_c_array(k)},\n"
+    if not keys:
+        out += '            "",\n'
     out +=  "        },\n"
     return out
 
 def gen_recipient_addr_material(recipient_addresses):
+    assert len(recipient_addresses) <= MAX_OUTPUTS_PER_TEST_CASE
     out = ""
     out += f"        {len(recipient_addresses)}," + "\n"
     out +=  "        { /* recipient pubkeys (address data) */\n"
-    assert len(recipient_addresses) <= MAX_OUTPUTS_PER_TEST_CASE
-    for i in range(MAX_OUTPUTS_PER_TEST_CASE):
-        out += "            {\n"
-        if i < len(recipient_addresses):
-            B_scan, B_spend = decode_silent_payments_address(recipient_addresses[i])
+    for ra in recipient_addresses:
+            out += "            {\n"
+            B_scan, B_spend = decode_silent_payments_address(ra)
             out += f"                {to_c_array(B_scan.hex())},\n"
             out += f"                {to_c_array(B_spend.hex())},\n"
-        else:
+            out += "            },\n"
+    if not recipient_addresses:
             out += '                "",\n'
-            out += '                "",\n'
-        out += "            },\n"
     out += "        },\n"
     return out
 
 def gen_sending_outputs(comment, output_sets, include_count=False):
+    assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
     out = ""
     if include_count:
         out += f"        {len(output_sets)}," + "\n"
@@ -146,14 +142,10 @@ def gen_sending_outputs(comment, output_sets, include_count=False):
         out += f"        {{ /* {comment} */" + "\n"
     else:
         out += "         {\n"
-    assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
-    for i in range(MAX_PERMUTATIONS_PER_SENDING_TEST_CASE):
-        out += gen_outputs(
-            comment=None,
-            outputs=output_sets[i] if i < len(output_sets) else [],
-            include_count=False,
-            indent=12,
-        )
+    for o in output_sets:
+        out += gen_outputs(comment=None, outputs=o, include_count=False, indent=12)
+    if not output_sets:
+        out += gen_outputs(comment=None, outputs=[], include_count=False, indent=12)
     out += "        },\n"
     return out
 
@@ -166,11 +158,10 @@ def gen_outputs(comment, outputs, include_count=False, indent=8):
         out += spaces + f"{{ /* {comment} */\n"
     else:
         out += spaces + "{\n"
-    for i in range(MAX_OUTPUTS_PER_TEST_CASE):
-        if i < len(outputs):
-            out += spaces + f"    {to_c_array(outputs[i])},\n"
-        else:
-            out += spaces + '    "",\n'
+    for o in outputs:
+        out += spaces + f"    {to_c_array(o)},\n"
+    if not outputs:
+        out += spaces + '    "",\n'
     out += spaces + "},\n"
     return out
 
