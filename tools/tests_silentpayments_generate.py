@@ -99,9 +99,9 @@ def get_pubkey_from_input(spk, script_sig, witness):
 
 def to_c_array(x):
     if x == "":
-        return ""
-    s = ',0x'.join(a+b for a,b in zip(x[::2], x[1::2]))
-    return "0x" + s
+        return "{0x00}"
+    s = ',0x'.join(a + b for a, b in zip(x[::2], x[1::2]))
+    return "{0x" + s + "}"
 
 def gen_key_material(comment, keys, include_count=False):
     out = ""
@@ -112,7 +112,7 @@ def gen_key_material(comment, keys, include_count=False):
     for i in range(MAX_INPUTS_PER_TEST_CASE):
         out += "            "
         if i < len(keys):
-            out += "{" + to_c_array(keys[i]) + "}"
+            out += to_c_array(keys[i])
         else:
             out += '""'
         out += ",\n"
@@ -128,13 +128,12 @@ def gen_recipient_addr_material(recipient_addresses):
         out += "            {\n"
         if i < len(recipient_addresses):
             B_scan, B_spend = decode_silent_payments_address(recipient_addresses[i])
-            out += "                {" + to_c_array(B_scan.hex()) + "},\n"
-            out += "                {" + to_c_array(B_spend.hex()) + "},\n"
+            out += f"                {to_c_array(B_scan.hex())},\n"
+            out += f"                {to_c_array(B_spend.hex())},\n"
         else:
             out += '                "",\n'
             out += '                "",\n'
-        out += "            }"
-        out += ",\n"
+        out += "            },\n"
     out += "        },\n"
     return out
 
@@ -169,7 +168,7 @@ def gen_outputs(comment, outputs, include_count=False, indent=8):
         out += spaces + "{\n"
     for i in range(MAX_OUTPUTS_PER_TEST_CASE):
         if i < len(outputs):
-            out += spaces + "    {" + to_c_array(outputs[i]) + "},\n"
+            out += spaces + f"    {to_c_array(outputs[i])},\n"
         else:
             out += spaces + '    "",\n'
     out += spaces + "},\n"
@@ -212,7 +211,7 @@ for test_i, test_vector in enumerate(test_vectors):
     out += gen_key_material("input taproot seckeys", input_taproot_seckeys, include_count=True)
     out += gen_key_material("input x-only pubkeys", input_xonly_pubkeys)
     out += "        /* smallest outpoint */\n"
-    out += "        {" + to_c_array(outpoint_L) + "},\n"
+    out += f"        {to_c_array(outpoint_L)},\n"
 
     # emit recipient pubkeys (address data)
     out += gen_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
@@ -223,8 +222,8 @@ for test_i, test_vector in enumerate(test_vectors):
     recv_test_given = test_vector['receiving'][0]['given']
     recv_test_expected = test_vector['receiving'][0]['expected']
     out += "        /* recipient data (scan and spend seckeys) */\n"
-    out += "        {" + to_c_array(recv_test_given['key_material']['scan_priv_key']) + "},\n"
-    out += "        {" + to_c_array(recv_test_given['key_material']['spend_priv_key']) + "},\n"
+    out += f"        {to_c_array(recv_test_given['key_material']['scan_priv_key'])},\n"
+    out += f"        {to_c_array(recv_test_given['key_material']['spend_priv_key'])},\n"
 
     # emit recipient to-scan outputs, labels and expected-found outputs
     out += gen_outputs("outputs to scan", recv_test_given['outputs'], include_count=True)
