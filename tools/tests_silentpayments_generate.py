@@ -103,8 +103,8 @@ def to_c_array(x):
     s = ',0x'.join(a+b for a,b in zip(x[::2], x[1::2]))
     return "0x" + s
 
-def emit_key_material(comment, keys, include_count=False):
-    global out
+def gen_key_material(comment, keys, include_count=False):
+    out = ""
     if include_count:
         out += f"        {len(keys)}," + "\n"
     out += f"        {{ /* {comment} */" + "\n"
@@ -117,9 +117,10 @@ def emit_key_material(comment, keys, include_count=False):
             out += '""'
         out += ",\n"
     out +=  "        },\n"
+    return out
 
-def emit_recipient_addr_material(recipient_addresses):
-    global out
+def gen_recipient_addr_material(recipient_addresses):
+    out = ""
     out += f"        {len(recipient_addresses)}," + "\n"
     out +=  "        { /* recipient pubkeys (address data) */\n"
     assert len(recipient_addresses) <= MAX_OUTPUTS_PER_TEST_CASE
@@ -135,9 +136,10 @@ def emit_recipient_addr_material(recipient_addresses):
         out += "            }"
         out += ",\n"
     out += "        },\n"
+    return out
 
-def emit_sending_outputs(comment, output_sets, include_count=False):
-    global out
+def gen_sending_outputs(comment, output_sets, include_count=False):
+    out = ""
     if include_count:
         out += f"        {len(output_sets)}," + "\n"
         out += f"        {len(output_sets[0])}," + "\n"
@@ -147,14 +149,17 @@ def emit_sending_outputs(comment, output_sets, include_count=False):
         out += "         {\n"
     assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
     for i in range(MAX_PERMUTATIONS_PER_SENDING_TEST_CASE):
-        if i < len(output_sets):
-            emit_outputs(comment=None, outputs=output_sets[i], include_count=False, indent=12)
-        else:
-            emit_outputs(comment=None, outputs=[], include_count=False, indent=12)
+        out += gen_outputs(
+            comment=None,
+            outputs=output_sets[i] if i < len(output_sets) else [],
+            include_count=False,
+            indent=12,
+        )
     out += "        },\n"
+    return out
 
-def emit_outputs(comment, outputs, include_count=False, last=False, indent=8):
-    global out
+def gen_outputs(comment, outputs, include_count=False, last=False, indent=8):
+    out = ""
     spaces = indent * " "
     if include_count:
         out += spaces + f"{len(outputs)},\n"
@@ -172,6 +177,7 @@ def emit_outputs(comment, outputs, include_count=False, last=False, indent=8):
     if not last:
         out += ","
     out += "\n"
+    return out
 
 if len(sys.argv) != 2:
     print("Usage: tests_silentpayments_generate.py vectors.json > vectors.h")
@@ -209,17 +215,17 @@ for test_i, test_vector in enumerate(test_vectors):
     out +=  "    {\n"
 
     outpoint_L = smallest_outpoint(outpoints).hex()
-    emit_key_material("input plain seckeys", input_plain_seckeys, include_count=True)
-    emit_key_material("input plain pubkeys", input_plain_pubkeys)
-    emit_key_material("input taproot seckeys", input_taproot_seckeys, include_count=True)
-    emit_key_material("input x-only pubkeys", input_xonly_pubkeys)
+    out += gen_key_material("input plain seckeys", input_plain_seckeys, include_count=True)
+    out += gen_key_material("input plain pubkeys", input_plain_pubkeys)
+    out += gen_key_material("input taproot seckeys", input_taproot_seckeys, include_count=True)
+    out += gen_key_material("input x-only pubkeys", input_xonly_pubkeys)
     out += "        /* smallest outpoint */\n"
     out += "        {" + to_c_array(outpoint_L) + "},\n"
 
     # emit recipient pubkeys (address data)
-    emit_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
+    out += gen_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
     # emit recipient outputs
-    emit_sending_outputs("recipient outputs", test_vector['sending'][0]['expected']['outputs'], include_count=True)
+    out += gen_sending_outputs("recipient outputs", test_vector['sending'][0]['expected']['outputs'], include_count=True)
 
     # emit recipient scan/spend seckeys
     recv_test_given = test_vector['receiving'][0]['given']
@@ -229,7 +235,7 @@ for test_i, test_vector in enumerate(test_vectors):
     out += "        {" + to_c_array(recv_test_given['key_material']['spend_priv_key']) + "},\n"
 
     # emit recipient to-scan outputs, labels and expected-found outputs
-    emit_outputs("outputs to scan", recv_test_given['outputs'], include_count=True)
+    out += gen_outputs("outputs to scan", recv_test_given['outputs'], include_count=True)
     labels = recv_test_given['labels']
     out += f"        {len(labels)}, " + "{"
     for i in range(4):
@@ -244,9 +250,9 @@ for test_i, test_vector in enumerate(test_vectors):
     expected_tweaks = [o['priv_key_tweak'] for o in recv_test_expected['outputs']]
     expected_signatures = [o['signature'] for o in recv_test_expected['outputs']]
     out += "        /* expected output data (pubkeys and seckey tweaks) */\n"
-    emit_outputs("", expected_pubkeys, include_count=True)
-    emit_outputs("", expected_tweaks)
-    emit_outputs("", expected_signatures, last=True)
+    out += gen_outputs("", expected_pubkeys, include_count=True)
+    out += gen_outputs("", expected_tweaks)
+    out += gen_outputs("", expected_signatures, last=True)
 
     out += "    }"
     if test_i != len(test_vectors) - 1:
