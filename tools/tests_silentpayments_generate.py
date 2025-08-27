@@ -46,28 +46,36 @@ def is_p2sh(s):  # OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUAL
     return (len(s) == 23) and (s[0] == 0xA9) and (s[1] == 0x14) and (s[-1] == 0x87)
 
 def is_p2pkh(s):  # OP_DUP OP_HASH160 OP_PUSHBYTES_20 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG
-    return (len(s) == 25) and (s[0] == 0x76) and (s[1] == 0xA9) and (s[2] == 0x14) and \
-        (s[-2] == 0x88) and (s[-1] == 0xAC)
+    return (
+        (len(s) == 25)
+        and (s[0] == 0x76)
+        and (s[1] == 0xA9)
+        and (s[2] == 0x14)
+        and (s[-2] == 0x88)
+        and (s[-1] == 0xAC)
+    )
+
 
 def get_pubkey_from_input(spk, script_sig, witness):
     # build witness stack from raw witness data
     witness_stack = []
-    no_witness_items = 0
+    num_witness_items = 0
     if len(witness) > 0:
-        no_witness_items = witness[0]
+        num_witness_items = witness[0]
         witness = witness[1:]
-    for i in range(no_witness_items):
+    for _ in range(num_witness_items):
         item_len = witness[0]
-        witness_stack.append(witness[1:item_len+1])
-        witness = witness[item_len+1:]
+        witness_stack.append(witness[1 : item_len + 1])
+        witness = witness[item_len + 1 :]
+    assert(witness == b'')
 
     if is_p2pkh(spk):
         spk_pkh = spk[3:3 + 20]
         for i in range(len(script_sig), 0, -1):
             if i - 33 >= 0:
-                pk = script_sig[i - 33:i]
-                if hash160(pk) == spk_pkh:
-                    return pk
+                pubkey = script_sig[i - 33:i]
+                if hash160(pubkey) == spk_pkh:
+                    return pubkey
     elif is_p2sh(spk) and is_p2wpkh(script_sig[1:]):
         pubkey = witness_stack[-1]
         if len(pubkey) == 33:
@@ -103,9 +111,7 @@ def emit_key_material(comment, keys, include_count=False):
     for i in range(MAX_INPUTS_PER_TEST_CASE):
         out += "            "
         if i < len(keys):
-            out += "{"
-            out += to_c_array(keys[i])
-            out += "}"
+            out += "{" + to_c_array(keys[i]) + "}"
         else:
             out += '""'
         out += ",\n"
@@ -119,12 +125,8 @@ def emit_recipient_addr_material(recipient_addresses):
         out += "            {\n"
         if i < len(recipient_addresses):
             B_scan, B_spend = decode_silent_payments_address(recipient_addresses[i])
-            out += "                {"
-            out += to_c_array(B_scan.hex())
-            out += "},\n"
-            out += "                {"
-            out += to_c_array(B_spend.hex())
-            out += "},\n"
+            out += "                {" + to_c_array(B_scan.hex()) + "},\n"
+            out += "                {" + to_c_array(B_spend.hex()) + "},\n"
         else:
             out += '                "",\n'
             out += '                "",\n'
@@ -143,30 +145,27 @@ def emit_sending_outputs(comment, output_sets, include_count=False):
         out += "         {\n"
     for i in range(MAX_PERMUTATIONS_PER_SENDING_TEST_CASE):
         if i < len(output_sets):
-            emit_outputs(comment=None, outputs=output_sets[i], include_count=False, spacing=12)
+            emit_outputs(comment=None, outputs=output_sets[i], include_count=False, indent=12)
         else:
-            emit_outputs(comment=None, outputs=[], include_count=False, spacing=12)
-    out += "        }"
-    out += ","
-    out += "\n"
+            emit_outputs(comment=None, outputs=[], include_count=False, indent=12)
+    out += "        },\n"
 
-def emit_outputs(comment, outputs, include_count=False, last=False, spacing=8):
+def emit_outputs(comment, outputs, include_count=False, last=False, indent=8):
     global out
+    spaces = indent * " "
     if include_count:
-        out += spacing*" " + f"{len(outputs)}," + "\n"
+        out += spaces + f"{len(outputs)},\n"
     if comment:
-        out += spacing*" " + f"{{ /* {comment} */" + "\n"
+        out += spaces + f"{{ /* {comment} */\n"
     else:
-        out += spacing*" " + "{\n"
+        out += spaces + "{\n"
     for i in range(MAX_OUTPUTS_PER_TEST_CASE):
         if i < len(outputs):
-            out += spacing*" " + "    {"
-            out += to_c_array(outputs[i])
-            out += "}"
+            out += spaces + "    {" + to_c_array(outputs[i]) + "}"
         else:
-            out += spacing*' ' + '    ""'
+            out += spaces + '    ""'
         out += ",\n"
-    out += spacing*" " + "}"
+    out += spaces + "}"
     if not last:
         out += ","
     out += "\n"
@@ -182,23 +181,23 @@ with open(filename_input) as f:
 out = ""
 num_vectors = 0
 
-for test_nr, test_vector in enumerate(test_vectors):
+for test_i, test_vector in enumerate(test_vectors):
     # determine input private and public keys, grouped into plain and taproot/x-only
     input_plain_seckeys = []
     input_taproot_seckeys = []
     input_plain_pubkeys = []
     input_xonly_pubkeys = []
     outpoints = []
-    for i in test_vector['sending'][0]['given']['vin']:
-        pub_key = get_pubkey_from_input(bytes.fromhex(i['prevout']['scriptPubKey']['hex']),
-            bytes.fromhex(i['scriptSig']), bytes.fromhex(i['txinwitness']))
+    for vec in test_vector['sending'][0]['given']['vin']:
+        pub_key = get_pubkey_from_input(bytes.fromhex(vec['prevout']['scriptPubKey']['hex']),
+            bytes.fromhex(vec['scriptSig']), bytes.fromhex(vec['txinwitness']))
         if len(pub_key) == 33:  # regular input
-            input_plain_seckeys.append(i['private_key'])
+            input_plain_seckeys.append(vec['private_key'])
             input_plain_pubkeys.append(pub_key.hex())
         elif len(pub_key) == 32:  # taproot input
-            input_taproot_seckeys.append(i['private_key'])
+            input_taproot_seckeys.append(vec['private_key'])
             input_xonly_pubkeys.append(pub_key.hex())
-        outpoints.append((i['txid'], i['vout']))
+        outpoints.append((vec['txid'], vec['vout']))
     if len(input_plain_pubkeys) == 0 and len(input_xonly_pubkeys) == 0:
         continue
 
@@ -212,9 +211,7 @@ for test_nr, test_vector in enumerate(test_vectors):
     emit_key_material("input taproot seckeys", input_taproot_seckeys, include_count=True)
     emit_key_material("input x-only pubkeys", input_xonly_pubkeys)
     out += "        /* smallest outpoint */\n"
-    out += "        {"
-    out += to_c_array(outpoint_L)
-    out += "},\n"
+    out += "        {" + to_c_array(outpoint_L) + "},\n"
 
     # emit recipient pubkeys (address data)
     emit_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
@@ -225,8 +222,8 @@ for test_nr, test_vector in enumerate(test_vectors):
     recv_test_given = test_vector['receiving'][0]['given']
     recv_test_expected = test_vector['receiving'][0]['expected']
     out += "        /* recipient data (scan and spend seckeys) */\n"
-    out += "        {" + f"{to_c_array(recv_test_given['key_material']['scan_priv_key'])}" + "},\n"
-    out += "        {" + f"{to_c_array(recv_test_given['key_material']['spend_priv_key'])}" + "},\n"
+    out += "        {" + to_c_array(recv_test_given['key_material']['scan_priv_key']) + "},\n"
+    out += "        {" + to_c_array(recv_test_given['key_material']['spend_priv_key']) + "},\n"
 
     # emit recipient to-scan outputs, labels and expected-found outputs
     emit_outputs("outputs to scan", recv_test_given['outputs'], include_count=True)
@@ -249,7 +246,7 @@ for test_nr, test_vector in enumerate(test_vectors):
     emit_outputs("", expected_signatures, last=True)
 
     out += "    }"
-    if test_nr != len(test_vectors)-1:
+    if test_i != len(test_vectors) - 1:
         out += ","
     out += "\n\n"
 
