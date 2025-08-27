@@ -158,7 +158,7 @@ def gen_sending_outputs(comment, output_sets, include_count=False):
     out += "        },\n"
     return out
 
-def gen_outputs(comment, outputs, include_count=False, last=False, indent=8):
+def gen_outputs(comment, outputs, include_count=False, indent=8):
     out = ""
     spaces = indent * " "
     if include_count:
@@ -169,14 +169,10 @@ def gen_outputs(comment, outputs, include_count=False, last=False, indent=8):
         out += spaces + "{\n"
     for i in range(MAX_OUTPUTS_PER_TEST_CASE):
         if i < len(outputs):
-            out += spaces + "    {" + to_c_array(outputs[i]) + "}"
+            out += spaces + "    {" + to_c_array(outputs[i]) + "},\n"
         else:
-            out += spaces + '    ""'
-        out += ",\n"
-    out += spaces + "}"
-    if not last:
-        out += ","
-    out += "\n"
+            out += spaces + '    "",\n'
+    out += spaces + "},\n"
     return out
 
 if len(sys.argv) != 2:
@@ -248,12 +244,8 @@ for test_i, test_vector in enumerate(test_vectors):
     out += "        /* expected output data (pubkeys and seckey tweaks) */\n"
     out += gen_outputs("", expected_pubkeys, include_count=True)
     out += gen_outputs("", expected_tweaks)
-    out += gen_outputs("", expected_signatures, last=True)
-
-    out += "    }"
-    if test_i != len(test_vectors) - 1:
-        out += ","
-    out += "\n\n"
+    out += gen_outputs("", expected_signatures)
+    out += "    },\n\n"
 
 STRUCT_DEFINITIONS = f"""
 #include <stddef.h>
