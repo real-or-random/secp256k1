@@ -472,14 +472,21 @@ void run_silentpayments_test_vector_send(const struct bip352_test_vector *test) 
         CHECK(secp256k1_keypair_create(CTX, &taproot_keypairs[i], test->taproot_seckeys[i]));
         taproot_keypair_ptrs[i] = &taproot_keypairs[i];
     }
-    ret = secp256k1_silentpayments_sender_create_outputs(CTX,
-                generated_output_ptrs,
-                recipient_ptrs,
-                test->num_outputs,
-                test->outpoint_smallest,
-                test->num_taproot_inputs > 0 ? taproot_keypair_ptrs : NULL, test->num_taproot_inputs,
-                test->num_plain_inputs > 0 ? plain_seckeys : NULL, test->num_plain_inputs
-    );
+    {
+        int32_t ecount = 0;
+        secp256k1_context_set_illegal_callback(CTX, counting_callback_fn, &ecount);
+        ret = secp256k1_silentpayments_sender_create_outputs(CTX,
+            generated_output_ptrs,
+            recipient_ptrs,
+            test->num_outputs,
+            test->outpoint_smallest,
+            test->num_taproot_inputs > 0 ? taproot_keypair_ptrs : NULL, test->num_taproot_inputs,
+            test->num_plain_inputs > 0 ? plain_seckeys : NULL, test->num_plain_inputs
+        );
+        secp256k1_context_set_illegal_callback(CTX, NULL, NULL);
+        /* We expect exactly one ARG_CHECK if the number of input keys was 0. */
+        CHECK(ecount == (test->num_taproot_inputs + test->num_plain_inputs == 0));
+    }
     /* If we are unable to create outputs, e.g., the input keys sum to zero, check that the
      * expected number of recipient outputs for this test case is zero
      */
@@ -534,37 +541,40 @@ void run_silentpayments_test_vector_receive(const struct bip352_test_vector *tes
 
 
     /* prepare the inputs */
+    for (i = 0; i < test->num_plain_inputs; i++) {
+        CHECK(secp256k1_ec_pubkey_parse(CTX, &plain_pubkeys_objs[i], test->plain_pubkeys[i], 33));
+        plain_pubkeys[i] = &plain_pubkeys_objs[i];
+    }
+    for (i = 0; i < test->num_taproot_inputs; i++) {
+        CHECK(secp256k1_xonly_pubkey_parse(CTX, &xonly_pubkeys_objs[i], test->xonly_pubkeys[i]));
+        xonly_pubkeys[i] = &xonly_pubkeys_objs[i];
+    }
     {
-        for (i = 0; i < test->num_plain_inputs; i++) {
-            CHECK(secp256k1_ec_pubkey_parse(CTX, &plain_pubkeys_objs[i], test->plain_pubkeys[i], 33));
-            plain_pubkeys[i] = &plain_pubkeys_objs[i];
-        }
-        for (i = 0; i < test->num_taproot_inputs; i++) {
-            CHECK(secp256k1_xonly_pubkey_parse(CTX, &xonly_pubkeys_objs[i], test->xonly_pubkeys[i]));
-            xonly_pubkeys[i] = &xonly_pubkeys_objs[i];
-        }
+        int32_t ecount = 0;
+        secp256k1_context_set_illegal_callback(CTX, counting_callback_fn, &ecount);
         ret = secp256k1_silentpayments_recipient_public_data_create(CTX, &public_data,
             test->outpoint_smallest,
             test->num_taproot_inputs > 0 ? xonly_pubkeys : NULL, test->num_taproot_inputs,
             test->num_plain_inputs > 0 ? plain_pubkeys : NULL, test->num_plain_inputs
         );
-        /* If we are unable to create the public_data object, e.g., the input public keys sum to
-         * zero, check that the expected number of recipient outputs for this test case is zero
-         */
-        if (!ret) {
-            CHECK(test->num_found_output_pubkeys == 0);
-            return;
-        }
+        secp256k1_context_set_illegal_callback(CTX, NULL, NULL);
+        /* We expect exactly one ARG_CHECK if the number of input keys was 0. */
+        CHECK(ecount == (test->num_taproot_inputs + test->num_plain_inputs == 0));
+    }
+    /* If we are unable to create the public_data object, e.g., the input public keys sum to
+     * zero, check that the expected number of recipient outputs for this test case is zero
+     */
+    if (!ret) {
+        CHECK(test->num_found_output_pubkeys == 0);
+        return;
     }
     /* prepare the outputs */
-    {
-        for (i = 0; i < test->num_to_scan_outputs; i++) {
-            CHECK(secp256k1_xonly_pubkey_parse(CTX, &tx_output_objs[i], test->to_scan_outputs[i]));
-            tx_outputs[i] = &tx_output_objs[i];
-        }
-        for (i = 0; i < test->num_found_output_pubkeys; i++) {
-            found_outputs[i] = &found_output_objs[i];
-        }
+    for (i = 0; i < test->num_to_scan_outputs; i++) {
+        CHECK(secp256k1_xonly_pubkey_parse(CTX, &tx_output_objs[i], test->to_scan_outputs[i]));
+        tx_outputs[i] = &tx_output_objs[i];
+    }
+    for (i = 0; i < test->num_found_output_pubkeys; i++) {
+        found_outputs[i] = &found_output_objs[i];
     }
 
     /* scan / spend pubkeys are not in the given data of the recipient part, so let's compute them */
@@ -693,7 +703,6 @@ static void silentpayments_sha256_tag_test(void) {
 
 void run_silentpayments_test_vectors(void) {
     size_t i;
-
 
     for (i = 0; i < sizeof(bip352_test_vectors) / sizeof(bip352_test_vectors[0]); i++) {
         const struct bip352_test_vector *test = &bip352_test_vectors[i];
