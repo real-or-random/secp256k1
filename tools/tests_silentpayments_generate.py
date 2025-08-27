@@ -108,6 +108,7 @@ def emit_key_material(comment, keys, include_count=False):
     if include_count:
         out += f"        {len(keys)}," + "\n"
     out += f"        {{ /* {comment} */" + "\n"
+    assert len(keys) <= MAX_INPUTS_PER_TEST_CASE
     for i in range(MAX_INPUTS_PER_TEST_CASE):
         out += "            "
         if i < len(keys):
@@ -121,6 +122,7 @@ def emit_recipient_addr_material(recipient_addresses):
     global out
     out += f"        {len(recipient_addresses)}," + "\n"
     out +=  "        { /* recipient pubkeys (address data) */\n"
+    assert len(recipient_addresses) <= MAX_OUTPUTS_PER_TEST_CASE
     for i in range(MAX_OUTPUTS_PER_TEST_CASE):
         out += "            {\n"
         if i < len(recipient_addresses):
@@ -143,6 +145,7 @@ def emit_sending_outputs(comment, output_sets, include_count=False):
         out += f"        {{ /* {comment} */" + "\n"
     else:
         out += "         {\n"
+    assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
     for i in range(MAX_PERMUTATIONS_PER_SENDING_TEST_CASE):
         if i < len(output_sets):
             emit_outputs(comment=None, outputs=output_sets[i], include_count=False, indent=12)
