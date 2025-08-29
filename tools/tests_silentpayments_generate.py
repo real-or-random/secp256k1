@@ -103,15 +103,18 @@ def to_c_array(x):
     s = ',0x'.join(a + b for a, b in zip(x[::2], x[1::2]))
     return "{0x" + s + "}"
 
+def maybe_gen_comment(comment):
+    if comment:
+        return f" /* {comment} */"
+    else:
+        return ""
+
 def gen_key_material(keys, comment=None, include_count=False):
     assert len(keys) <= MAX_INPUTS_PER_TEST_CASE
     out = ""
     if include_count:
         out += f"        {len(keys)},\n"
-    if comment:
-        out += f"        {{ /* {comment} */\n"
-    else:
-        out += "         {\n"
+    out += f"        {{{maybe_gen_comment(comment)}\n"
     for k in keys:
         out += f"            {to_c_array(k)},\n"
     if not keys:
@@ -121,9 +124,8 @@ def gen_key_material(keys, comment=None, include_count=False):
 
 def gen_recipient_addr_material(recipient_addresses):
     assert len(recipient_addresses) <= MAX_OUTPUTS_PER_TEST_CASE
-    out = ""
-    out += f"        {len(recipient_addresses)},\n"
-    out +=  "        { /* recipient pubkeys (address data) */\n"
+    out = f"        {len(recipient_addresses)},\n"
+    out += "        { /* recipient pubkeys (address data) */\n"
     for ra in recipient_addresses:
             out += "            {\n"
             B_scan, B_spend = decode_silent_payments_address(ra)
@@ -141,10 +143,7 @@ def gen_sending_outputs(output_sets, comment=None, include_count=False):
     if include_count:
         out += f"        {len(output_sets)},\n"
         out += f"        {len(output_sets[0])},\n"
-    if comment:
-        out += f"        {{ /* {comment} */\n"
-    else:
-        out += "         {\n"
+    out += f"        {{{maybe_gen_comment(comment)}\n"
     for o in output_sets:
         out += gen_outputs(outputs=o, include_count=False, indent=12)
     if not output_sets:
@@ -157,15 +156,24 @@ def gen_outputs(outputs, comment=None, include_count=False, indent=8):
     spaces = indent * " "
     if include_count:
         out += spaces + f"{len(outputs)},\n"
-    if comment:
-        out += spaces + f"{{ /* {comment} */\n"
-    else:
-        out += spaces + "{\n"
+    out += spaces + f"{{{maybe_gen_comment(comment)}\n"
     for o in outputs:
         out += spaces + f"    {to_c_array(o)},\n"
     if not outputs:
         out += spaces + '    "",\n'
     out += spaces + "},\n"
+    return out
+
+def gen_labels(labels):
+    assert len(labels) <= MAX_OUTPUTS_PER_TEST_CASE
+    out = "        /* labels */\n"
+    out += f"        {len(labels)}, {{"
+    for i in range(MAX_OUTPUTS_PER_TEST_CASE):
+        if i < len(labels):
+            out += f"{labels[i]}, "
+        else:
+            out += "0xffffffff, "
+    out += "},\n"
     return out
 
 if len(sys.argv) != 2:
@@ -221,16 +229,7 @@ for test_i, test_vector in enumerate(test_vectors):
 
     # emit recipient to-scan outputs, labels and expected-found outputs
     out += gen_outputs(recv_test_given['outputs'], "outputs to scan", include_count=True)
-    labels = recv_test_given['labels']
-    out += f"        {len(labels)}, {{"
-    for i in range(4):
-        if i < len(labels):
-            out += f"{labels[i]}"
-        else:
-            out += "0xffffffff"
-        if i != 3:
-            out += ", "
-    out += "}, /* labels */\n"
+    out += gen_labels(recv_test_given['labels'])
     expected_pubkeys = [o['pub_key'] for o in recv_test_expected['outputs']]
     expected_tweaks = [o['priv_key_tweak'] for o in recv_test_expected['outputs']]
     expected_signatures = [o['signature'] for o in recv_test_expected['outputs']]
