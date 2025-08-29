@@ -107,9 +107,9 @@ def gen_key_material(keys, comment=None, include_count=False):
     assert len(keys) <= MAX_INPUTS_PER_TEST_CASE
     out = ""
     if include_count:
-        out += f"        {len(keys)}," + "\n"
+        out += f"        {len(keys)},\n"
     if comment:
-        out += f"        {{ /* {comment} */" + "\n"
+        out += f"        {{ /* {comment} */\n"
     else:
         out += "         {\n"
     for k in keys:
@@ -122,7 +122,7 @@ def gen_key_material(keys, comment=None, include_count=False):
 def gen_recipient_addr_material(recipient_addresses):
     assert len(recipient_addresses) <= MAX_OUTPUTS_PER_TEST_CASE
     out = ""
-    out += f"        {len(recipient_addresses)}," + "\n"
+    out += f"        {len(recipient_addresses)},\n"
     out +=  "        { /* recipient pubkeys (address data) */\n"
     for ra in recipient_addresses:
             out += "            {\n"
@@ -139,10 +139,10 @@ def gen_sending_outputs(output_sets, comment=None, include_count=False):
     assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
     out = ""
     if include_count:
-        out += f"        {len(output_sets)}," + "\n"
-        out += f"        {len(output_sets[0])}," + "\n"
+        out += f"        {len(output_sets)},\n"
+        out += f"        {len(output_sets[0])},\n"
     if comment:
-        out += f"        {{ /* {comment} */" + "\n"
+        out += f"        {{ /* {comment} */\n"
     else:
         out += "         {\n"
     for o in output_sets:
@@ -222,7 +222,7 @@ for test_i, test_vector in enumerate(test_vectors):
     # emit recipient to-scan outputs, labels and expected-found outputs
     out += gen_outputs(recv_test_given['outputs'], "outputs to scan", include_count=True)
     labels = recv_test_given['labels']
-    out += f"        {len(labels)}, " + "{"
+    out += f"        {len(labels)}, {{"
     for i in range(4):
         if i < len(labels):
             out += f"{labels[i]}"
