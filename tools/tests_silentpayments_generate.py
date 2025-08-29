@@ -187,24 +187,24 @@ def gen_recipient_addr_material(recipient_addresses):
     out += "        },\n"
     return out
 
-def gen_sending_outputs(output_sets, comment=None, include_count=False):
+def gen_sending_outputs(output_sets, comment=None, prepend_count=False):
     assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
     out = ""
-    if include_count:
+    if prepend_count:
         out += f"        {len(output_sets)},\n"
         out += f"        {len(output_sets[0])},\n"
     out += f"        {{{maybe_gen_comment(comment)}\n"
     for o in output_sets:
-        out += gen_outputs(outputs=o, include_count=False, indent=12)
+        out += gen_outputs(outputs=o, prepend_count=False, indent=12)
     if not output_sets:
-        out += gen_outputs(outputs=[], include_count=False, indent=12)
+        out += gen_outputs(outputs=[], prepend_count=False, indent=12)
     out += "        },\n"
     return out
 
-def gen_outputs(outputs, comment=None, include_count=False, indent=8):
+def gen_outputs(outputs, comment=None, prepend_count=False, indent=8):
     out = ""
     spaces = indent * " "
-    if include_count:
+    if prepend_count:
         out += spaces + f"{len(outputs)},\n"
     out += spaces + f"{{{maybe_gen_comment(comment)}\n"
     for o in outputs:
@@ -261,7 +261,7 @@ def gen_test_vectors(test_vectors):
         # emit recipient pubkeys (address data)
         out += gen_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
         # emit recipient outputs
-        out += gen_sending_outputs(test_vector['sending'][0]['expected']['outputs'], "recipient outputs", include_count=True)
+        out += gen_sending_outputs(test_vector['sending'][0]['expected']['outputs'], "recipient outputs", prepend_count=True)
 
         # emit recipient scan/spend seckeys
         recv_test_given = test_vector['receiving'][0]['given']
@@ -271,13 +271,13 @@ def gen_test_vectors(test_vectors):
         out += f"        {gen_byte_array(recv_test_given['key_material']['spend_priv_key'])},\n"
 
         # emit recipient to-scan outputs, labels and expected-found outputs
-        out += gen_outputs(recv_test_given['outputs'], "outputs to scan", include_count=True)
+        out += gen_outputs(recv_test_given['outputs'], "outputs to scan", prepend_count=True)
         out += gen_labels(recv_test_given['labels'])
         expected_pubkeys = [o['pub_key'] for o in recv_test_expected['outputs']]
         expected_tweaks = [o['priv_key_tweak'] for o in recv_test_expected['outputs']]
         expected_signatures = [o['signature'] for o in recv_test_expected['outputs']]
         out += "        /* expected output data (pubkeys and seckey tweaks) */\n"
-        out += gen_outputs(expected_pubkeys, include_count=True)
+        out += gen_outputs(expected_pubkeys, prepend_count=True)
         out += gen_outputs(expected_tweaks)
         out += gen_outputs(expected_signatures)
         out += "    },\n\n"
