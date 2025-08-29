@@ -103,12 +103,15 @@ def to_c_array(x):
     s = ',0x'.join(a + b for a, b in zip(x[::2], x[1::2]))
     return "{0x" + s + "}"
 
-def gen_key_material(comment, keys, include_count=False):
+def gen_key_material(keys, comment=None, include_count=False):
     assert len(keys) <= MAX_INPUTS_PER_TEST_CASE
     out = ""
     if include_count:
         out += f"        {len(keys)}," + "\n"
-    out += f"        {{ /* {comment} */" + "\n"
+    if comment:
+        out += f"        {{ /* {comment} */" + "\n"
+    else:
+        out += "         {\n"
     for k in keys:
         out += f"            {to_c_array(k)},\n"
     if not keys:
@@ -132,7 +135,7 @@ def gen_recipient_addr_material(recipient_addresses):
     out += "        },\n"
     return out
 
-def gen_sending_outputs(comment, output_sets, include_count=False):
+def gen_sending_outputs(output_sets, comment=None, include_count=False):
     assert len(output_sets) <= MAX_PERMUTATIONS_PER_SENDING_TEST_CASE
     out = ""
     if include_count:
@@ -143,13 +146,13 @@ def gen_sending_outputs(comment, output_sets, include_count=False):
     else:
         out += "         {\n"
     for o in output_sets:
-        out += gen_outputs(comment=None, outputs=o, include_count=False, indent=12)
+        out += gen_outputs(outputs=o, include_count=False, indent=12)
     if not output_sets:
-        out += gen_outputs(comment=None, outputs=[], include_count=False, indent=12)
+        out += gen_outputs(outputs=[], include_count=False, indent=12)
     out += "        },\n"
     return out
 
-def gen_outputs(comment, outputs, include_count=False, indent=8):
+def gen_outputs(outputs, comment=None, include_count=False, indent=8):
     out = ""
     spaces = indent * " "
     if include_count:
@@ -197,17 +200,17 @@ for test_i, test_vector in enumerate(test_vectors):
     out +=  "    {\n"
 
     outpoint_L = smallest_outpoint(outpoints).hex()
-    out += gen_key_material("input plain seckeys", input_plain_seckeys, include_count=True)
-    out += gen_key_material("input plain pubkeys", input_plain_pubkeys)
-    out += gen_key_material("input taproot seckeys", input_taproot_seckeys, include_count=True)
-    out += gen_key_material("input x-only pubkeys", input_xonly_pubkeys)
+    out += gen_key_material(input_plain_seckeys, "input plain seckeys", include_count=True)
+    out += gen_key_material(input_plain_pubkeys, "input plain pubkeys")
+    out += gen_key_material(input_taproot_seckeys, "input taproot seckeys", include_count=True)
+    out += gen_key_material(input_xonly_pubkeys, "input x-only pubkeys")
     out += "        /* smallest outpoint */\n"
     out += f"        {to_c_array(outpoint_L)},\n"
 
     # emit recipient pubkeys (address data)
     out += gen_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
     # emit recipient outputs
-    out += gen_sending_outputs("recipient outputs", test_vector['sending'][0]['expected']['outputs'], include_count=True)
+    out += gen_sending_outputs(test_vector['sending'][0]['expected']['outputs'], "recipient outputs", include_count=True)
 
     # emit recipient scan/spend seckeys
     recv_test_given = test_vector['receiving'][0]['given']
@@ -217,7 +220,7 @@ for test_i, test_vector in enumerate(test_vectors):
     out += f"        {to_c_array(recv_test_given['key_material']['spend_priv_key'])},\n"
 
     # emit recipient to-scan outputs, labels and expected-found outputs
-    out += gen_outputs("outputs to scan", recv_test_given['outputs'], include_count=True)
+    out += gen_outputs(recv_test_given['outputs'], "outputs to scan", include_count=True)
     labels = recv_test_given['labels']
     out += f"        {len(labels)}, " + "{"
     for i in range(4):
@@ -232,9 +235,9 @@ for test_i, test_vector in enumerate(test_vectors):
     expected_tweaks = [o['priv_key_tweak'] for o in recv_test_expected['outputs']]
     expected_signatures = [o['signature'] for o in recv_test_expected['outputs']]
     out += "        /* expected output data (pubkeys and seckey tweaks) */\n"
-    out += gen_outputs("", expected_pubkeys, include_count=True)
-    out += gen_outputs("", expected_tweaks)
-    out += gen_outputs("", expected_signatures)
+    out += gen_outputs(expected_pubkeys, include_count=True)
+    out += gen_outputs(expected_tweaks)
+    out += gen_outputs(expected_signatures)
     out += "    },\n\n"
 
 STRUCT_DEFINITIONS = f"""
