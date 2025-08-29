@@ -97,10 +97,10 @@ def get_pubkey_from_input(spk, script_sig, witness):
 
     return b''
 
-def to_c_array(x):
-    if x == "":
+def gen_byte_array(hex):
+    if hex == "":
         return "{0x00}"
-    s = ',0x'.join(a + b for a, b in zip(x[::2], x[1::2]))
+    s = ',0x'.join(a + b for a, b in zip(hex[::2], hex[1::2]))
     return "{0x" + s + "}"
 
 def maybe_gen_comment(comment):
@@ -116,7 +116,7 @@ def gen_key_material(keys, comment=None, include_count=False):
         out += f"        {len(keys)},\n"
     out += f"        {{{maybe_gen_comment(comment)}\n"
     for k in keys:
-        out += f"            {to_c_array(k)},\n"
+        out += f"            {gen_byte_array(k)},\n"
     if not keys:
         out += '            "",\n'
     out +=  "        },\n"
@@ -129,8 +129,8 @@ def gen_recipient_addr_material(recipient_addresses):
     for ra in recipient_addresses:
             out += "            {\n"
             B_scan, B_spend = decode_silent_payments_address(ra)
-            out += f"                {to_c_array(B_scan.hex())},\n"
-            out += f"                {to_c_array(B_spend.hex())},\n"
+            out += f"                {gen_byte_array(B_scan.hex())},\n"
+            out += f"                {gen_byte_array(B_spend.hex())},\n"
             out += "            },\n"
     if not recipient_addresses:
             out += '                "",\n'
@@ -158,7 +158,7 @@ def gen_outputs(outputs, comment=None, include_count=False, indent=8):
         out += spaces + f"{len(outputs)},\n"
     out += spaces + f"{{{maybe_gen_comment(comment)}\n"
     for o in outputs:
-        out += spaces + f"    {to_c_array(o)},\n"
+        out += spaces + f"    {gen_byte_array(o)},\n"
     if not outputs:
         out += spaces + '    "",\n'
     out += spaces + "},\n"
@@ -213,7 +213,7 @@ for test_i, test_vector in enumerate(test_vectors):
     out += gen_key_material(input_taproot_seckeys, "input taproot seckeys", include_count=True)
     out += gen_key_material(input_xonly_pubkeys, "input x-only pubkeys")
     out += "        /* smallest outpoint */\n"
-    out += f"        {to_c_array(outpoint_L)},\n"
+    out += f"        {gen_byte_array(outpoint_L)},\n"
 
     # emit recipient pubkeys (address data)
     out += gen_recipient_addr_material(test_vector['sending'][0]['given']['recipients'])
@@ -224,8 +224,8 @@ for test_i, test_vector in enumerate(test_vectors):
     recv_test_given = test_vector['receiving'][0]['given']
     recv_test_expected = test_vector['receiving'][0]['expected']
     out += "        /* recipient data (scan and spend seckeys) */\n"
-    out += f"        {to_c_array(recv_test_given['key_material']['scan_priv_key'])},\n"
-    out += f"        {to_c_array(recv_test_given['key_material']['spend_priv_key'])},\n"
+    out += f"        {gen_byte_array(recv_test_given['key_material']['scan_priv_key'])},\n"
+    out += f"        {gen_byte_array(recv_test_given['key_material']['spend_priv_key'])},\n"
 
     # emit recipient to-scan outputs, labels and expected-found outputs
     out += gen_outputs(recv_test_given['outputs'], "outputs to scan", include_count=True)
