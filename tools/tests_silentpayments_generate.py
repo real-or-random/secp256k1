@@ -66,7 +66,7 @@ def get_pubkey_from_input(spk, script_sig, witness):
         item_len = witness[0]
         witness_stack.append(witness[1 : item_len + 1])
         witness = witness[item_len + 1 :]
-    assert(witness == b'')
+    assert witness == b''
 
     if is_p2pkh(spk):
         spk_pkh = spk[3:3 + 20]
@@ -237,14 +237,16 @@ def gen_test_vectors(test_vectors):
         input_xonly_pubkeys = []
         outpoints = []
         for vec in test_vector['sending'][0]['given']['vin']:
-            pub_key = get_pubkey_from_input(bytes.fromhex(vec['prevout']['scriptPubKey']['hex']),
+            pubkey = get_pubkey_from_input(bytes.fromhex(vec['prevout']['scriptPubKey']['hex']),
                 bytes.fromhex(vec['scriptSig']), bytes.fromhex(vec['txinwitness']))
-            if len(pub_key) == 33:  # regular input
+            if len(pubkey) == 33:  # regular input
                 input_plain_seckeys.append(vec['private_key'])
-                input_plain_pubkeys.append(pub_key.hex())
-            elif len(pub_key) == 32:  # taproot input
+                input_plain_pubkeys.append(pubkey.hex())
+            elif len(pubkey) == 32:  # taproot input
                 input_taproot_seckeys.append(vec['private_key'])
-                input_xonly_pubkeys.append(pub_key.hex())
+                input_xonly_pubkeys.append(pubkey.hex())
+            else:
+                assert pubkey == b''
             outpoints.append((vec['txid'], vec['vout']))
 
         out += f"    /* ----- {test_vector['comment']} ({test_i + 1}) ----- */\n"
