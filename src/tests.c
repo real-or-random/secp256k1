@@ -5269,7 +5269,7 @@ static void run_ecmult_multi_tests(void) {
     test_ecmult_multi_batching();
 }
 
-static void test_wnaf(const secp256k1_scalar *number, int w) {
+static void test_wnaf(const secp256k1_scalar *number, int w) { /* FIXME */
     secp256k1_scalar x, two, t;
     int wnaf[256];
     int zeroes = -1;
@@ -5277,7 +5277,7 @@ static void test_wnaf(const secp256k1_scalar *number, int w) {
     int bits;
     secp256k1_scalar_set_int(&x, 0);
     secp256k1_scalar_set_int(&two, 2);
-    bits = secp256k1_ecmult_wnaf(wnaf, 256, number, w);
+    bits = secp256k1_ecmult_wnaf32(wnaf, 256, number, w);
     CHECK(bits <= 256);
     for (i = bits-1; i >= 0; i--) {
         int v = wnaf[i];

@@ -43,7 +43,7 @@ typedef struct {
     secp256k1_ge ge[2];
     secp256k1_gej gej[2];
     unsigned char data[64];
-    int wnaf[256];
+    int8_t wnaf[256];
 } bench_inv;
 
 static void bench_setup(void* arg) {
@@ -333,7 +333,7 @@ static void bench_ecmult_wnaf(void* arg, int iters) {
     bench_inv *data = (bench_inv*)arg;
 
     for (i = 0; i < iters; i++) {
-        bits += secp256k1_ecmult_wnaf(data->wnaf, 256, &data->scalar[0], WINDOW_A);
+        bits += secp256k1_ecmult_wnaf8(data->wnaf, 256, &data->scalar[0], WINDOW_A);
         overflow += secp256k1_scalar_add(&data->scalar[0], &data->scalar[0], &data->scalar[1]);
     }
     CHECK(overflow >= 0);
