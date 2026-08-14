@@ -305,8 +305,11 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const 
     if (seed32 == NULL) {
         /* When seed is NULL, reset the final point and blinding value. */
         secp256k1_ge_neg(&ctx->ge_offset, &secp256k1_ge_const_g);
+        SECP256K1_FE_VERIFY_MAGNITUDE(&ctx->ge_offset.x, 1);
+        SECP256K1_FE_VERIFY_MAGNITUDE(&ctx->ge_offset.y, 2);
         secp256k1_scalar_add(&ctx->scalar_offset, &secp256k1_scalar_one, &diff);
         ctx->proj_blind = secp256k1_fe_one;
+        SECP256K1_FE_VERIFY_MAGNITUDE(&ctx->proj_blind, 1);
         return;
     }
     /* The prior blinding value (if not reset) is chained forward by including it in the hash. */
@@ -325,6 +328,7 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const 
     secp256k1_fe_set_b32_mod(&f, nonce32);
     secp256k1_fe_cmov(&f, &secp256k1_fe_one, secp256k1_fe_normalizes_to_zero(&f));
     ctx->proj_blind = f;
+    SECP256K1_FE_VERIFY_MAGNITUDE(&ctx->proj_blind, 1);
 
     /* For a random blinding value b, set scalar_offset=diff-b, ge_offset=bG */
     secp256k1_rfc6979_hmac_sha256_generate(hash_ctx, &rng, nonce32, 32);
@@ -334,6 +338,12 @@ static void secp256k1_ecmult_gen_blind(secp256k1_ecmult_gen_context *ctx, const 
     secp256k1_scalar_cmov(&b, &secp256k1_scalar_one, secp256k1_scalar_is_zero(&b));
     secp256k1_rfc6979_hmac_sha256_finalize(&rng);
     secp256k1_ecmult_gen_ge(ctx, &ctx->ge_offset, &b);
+    SECP256K1_FE_VERIFY_MAGNITUDE(&ctx->ge_offset.x, 1);
+    SECP256K1_FE_VERIFY_MAGNITUDE(&ctx->ge_offset.y, 1);
+    #ifdef VERIFY
+    /* HACK set worst case magnitude */
+    ctx->ge_offset.y.magnitude = 2;
+    #endif
     secp256k1_scalar_negate(&b, &b);
     secp256k1_scalar_add(&ctx->scalar_offset, &b, &diff);
 
