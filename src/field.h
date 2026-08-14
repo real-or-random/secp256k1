@@ -21,7 +21,7 @@
  * compile time, and do not depend on the chosen field implementation. Despite
  * that, what these properties actually entail for the field representation
  * values depends on the chosen field implementation. These properties are:
- * - magnitude: an integer in [0,32]
+ * - magnitude: an integer in [0,31]
  * - normalized: 0 or 1; normalized=1 implies magnitude <= 1.
  *
  * In VERIFY mode, they are materialized explicitly as fields in the struct,
@@ -166,7 +166,7 @@ static int secp256k1_fe_is_odd(const secp256k1_fe *a);
 /** Determine whether two field elements are equal.
  *
  * On input, a and b must be valid field elements with magnitudes not exceeding
- * 1 and 30, respectively.
+ * 1 and 29, respectively.
  * Returns a = b (mod p).
  */
 static int secp256k1_fe_equal(const secp256k1_fe *a, const secp256k1_fe *b);
@@ -204,7 +204,7 @@ static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a);
 /** Negate a field element.
  *
  * On input, r does not need to be initialized. a must be a valid field element with
- * magnitude not exceeding m. m must be an integer constant expression in [0,31].
+ * magnitude not exceeding m. m must be an integer constant expression in [0,30].
  * Performs {r = -a}.
  * On output, r will not be normalized, and will have magnitude m+1.
  */

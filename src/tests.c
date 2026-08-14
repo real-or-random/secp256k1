@@ -3142,7 +3142,7 @@ static void run_fe_equal_magnitude_boundaries(void) {
         testutil_random_fe(&a);
         b = a;
         testutil_random_fe_magnitude(&a, 1);
-        testutil_random_fe_magnitude(&b, 30);
+        testutil_random_fe_magnitude(&b, 29);
         CHECK(secp256k1_fe_equal(&a, &b));
     }
 }

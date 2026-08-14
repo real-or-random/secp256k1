@@ -27,7 +27,7 @@ SECP256K1_INLINE static int secp256k1_fe_equal(const secp256k1_fe *a, const secp
     SECP256K1_FE_VERIFY(a);
     SECP256K1_FE_VERIFY(b);
     SECP256K1_FE_VERIFY_MAGNITUDE(a, 1);
-    SECP256K1_FE_VERIFY_MAGNITUDE(b, 30);
+    SECP256K1_FE_VERIFY_MAGNITUDE(b, 29);
 
     secp256k1_fe_negate(&na, a, 1);
     secp256k1_fe_add(&na, b);
@@ -151,8 +151,8 @@ static void secp256k1_fe_verify_magnitude(const secp256k1_fe *a, int m) { (void)
 #else
 static void secp256k1_fe_impl_verify(const secp256k1_fe *a);
 static void secp256k1_fe_verify(const secp256k1_fe *a) {
-    /* Magnitude between 0 and 32. */
-    SECP256K1_FE_VERIFY_MAGNITUDE(a, 32);
+    /* Magnitude between 0 and 31. */
+    SECP256K1_FE_VERIFY_MAGNITUDE(a, 31);
     /* Normalized is 0 or 1. */
     VERIFY_CHECK((a->normalized == 0) || (a->normalized == 1));
     /* If normalized, magnitude must be 0 or 1. */
@@ -163,13 +163,14 @@ static void secp256k1_fe_verify(const secp256k1_fe *a) {
 
 static void secp256k1_fe_verify_magnitude(const secp256k1_fe *a, int m) {
     VERIFY_CHECK(m >= 0);
-    VERIFY_CHECK(m <= 32);
+    VERIFY_CHECK(m <= 31);
     VERIFY_CHECK(a->magnitude <= m);
 }
 
 static void secp256k1_fe_impl_normalize(secp256k1_fe *r);
 SECP256K1_INLINE static void secp256k1_fe_normalize(secp256k1_fe *r) {
     SECP256K1_FE_VERIFY(r);
+    SECP256K1_FE_VERIFY_MAGNITUDE(r, 31);
 
     secp256k1_fe_impl_normalize(r);
     r->magnitude = 1;
@@ -181,6 +182,7 @@ SECP256K1_INLINE static void secp256k1_fe_normalize(secp256k1_fe *r) {
 static void secp256k1_fe_impl_normalize_weak(secp256k1_fe *r);
 SECP256K1_INLINE static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
     SECP256K1_FE_VERIFY(r);
+    SECP256K1_FE_VERIFY_MAGNITUDE(r, 31);
 
     secp256k1_fe_impl_normalize_weak(r);
     r->magnitude = 1;
@@ -191,6 +193,7 @@ SECP256K1_INLINE static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
 static void secp256k1_fe_impl_normalize_var(secp256k1_fe *r);
 SECP256K1_INLINE static void secp256k1_fe_normalize_var(secp256k1_fe *r) {
     SECP256K1_FE_VERIFY(r);
+    SECP256K1_FE_VERIFY_MAGNITUDE(r, 31);
 
     secp256k1_fe_impl_normalize_var(r);
     r->magnitude = 1;
@@ -202,6 +205,7 @@ SECP256K1_INLINE static void secp256k1_fe_normalize_var(secp256k1_fe *r) {
 static int secp256k1_fe_impl_normalizes_to_zero(const secp256k1_fe *r);
 SECP256K1_INLINE static int secp256k1_fe_normalizes_to_zero(const secp256k1_fe *r) {
     SECP256K1_FE_VERIFY(r);
+    SECP256K1_FE_VERIFY_MAGNITUDE(r, 31);
 
     return secp256k1_fe_impl_normalizes_to_zero(r);
 }
@@ -209,6 +213,7 @@ SECP256K1_INLINE static int secp256k1_fe_normalizes_to_zero(const secp256k1_fe *
 static int secp256k1_fe_impl_normalizes_to_zero_var(const secp256k1_fe *r);
 SECP256K1_INLINE static int secp256k1_fe_normalizes_to_zero_var(const secp256k1_fe *r) {
     SECP256K1_FE_VERIFY(r);
+    SECP256K1_FE_VERIFY_MAGNITUDE(r, 31);
 
     return secp256k1_fe_impl_normalizes_to_zero_var(r);
 }
@@ -296,7 +301,7 @@ SECP256K1_INLINE static void secp256k1_fe_get_b32(unsigned char *r, const secp25
 static void secp256k1_fe_impl_negate_unchecked(secp256k1_fe *r, const secp256k1_fe *a, int m);
 SECP256K1_INLINE static void secp256k1_fe_negate_unchecked(secp256k1_fe *r, const secp256k1_fe *a, int m) {
     SECP256K1_FE_VERIFY(a);
-    VERIFY_CHECK(m >= 0 && m <= 31);
+    VERIFY_CHECK(m >= 0 && m <= 30);
     SECP256K1_FE_VERIFY_MAGNITUDE(a, m);
 
     secp256k1_fe_impl_negate_unchecked(r, a, m);
@@ -310,8 +315,8 @@ static void secp256k1_fe_impl_mul_int_unchecked(secp256k1_fe *r, int a);
 SECP256K1_INLINE static void secp256k1_fe_mul_int_unchecked(secp256k1_fe *r, int a) {
     SECP256K1_FE_VERIFY(r);
 
-    VERIFY_CHECK(a >= 0 && a <= 32);
-    VERIFY_CHECK(a*r->magnitude <= 32);
+    VERIFY_CHECK(a >= 0 && a <= 31);
+    VERIFY_CHECK(a * r->magnitude <= 31);
     secp256k1_fe_impl_mul_int_unchecked(r, a);
     r->magnitude *= a;
     r->normalized = 0;
@@ -431,7 +436,7 @@ SECP256K1_INLINE static int secp256k1_fe_is_square_var(const secp256k1_fe *x) {
 static void secp256k1_fe_impl_get_bounds(secp256k1_fe* r, int m);
 SECP256K1_INLINE static void secp256k1_fe_get_bounds(secp256k1_fe* r, int m) {
     VERIFY_CHECK(m >= 0);
-    VERIFY_CHECK(m <= 32);
+    VERIFY_CHECK(m <= 31);
 
     secp256k1_fe_impl_get_bounds(r, m);
     r->magnitude = m;
