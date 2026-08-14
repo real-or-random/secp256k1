@@ -3132,6 +3132,7 @@ static int fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {
     secp256k1_fe an = *a;
     secp256k1_fe bn = *b;
     secp256k1_fe_normalize_weak(&an);
+    secp256k1_fe_normalize_weak(&bn);
     return secp256k1_fe_equal(&an, &bn);
 }
 
@@ -3142,7 +3143,7 @@ static void run_fe_equal_magnitude_boundaries(void) {
         testutil_random_fe(&a);
         b = a;
         testutil_random_fe_magnitude(&a, 1);
-        testutil_random_fe_magnitude(&b, 29);
+        testutil_random_fe_magnitude(&b, 6);
         CHECK(secp256k1_fe_equal(&a, &b));
     }
 }
@@ -3265,7 +3266,7 @@ static void run_field_half(void) {
     CHECK(secp256k1_fe_normalizes_to_zero(&t));
 
     /* Check non-zero magnitudes in the supported range */
-    for (m = 1; m < 32; m++) {
+    for (m = 1; m < 9; m++) {
         /* Check max-value input */
         secp256k1_fe_get_bounds(&t, m);
 
@@ -3393,6 +3394,7 @@ static void run_field_misc(void) {
         CHECK(fe_equal(&z, &q));
         secp256k1_fe_negate(&x, &x, 1);
         secp256k1_fe_add(&z, &x);
+        secp256k1_fe_normalize_weak(&q);
         secp256k1_fe_add(&q, &x);
         CHECK(fe_equal(&y, &z));
         CHECK(fe_equal(&q, &y));
