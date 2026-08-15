@@ -126,11 +126,11 @@ typedef struct {
      * This expression lets us use scalar blinding and optimize the comb precomputation. See
      * ecmult_gen_impl.h for more details. */
     secp256k1_scalar scalar_offset;
-    secp256k1_ge ge_offset;
+    secp256k1_ge_storage ge_offset;
 
     /* Factor used for projective blinding. This value is used to rescale the Z
      * coordinate of the first table lookup. */
-    secp256k1_fe proj_blind;
+    secp256k1_fe_storage proj_blind;
 } secp256k1_ecmult_gen_context;
 
 static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context* ctx, const secp256k1_hash_ctx *hash_ctx);

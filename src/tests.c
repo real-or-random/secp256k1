@@ -129,10 +129,16 @@ static void run_selftest_tests(void) {
 }
 
 static int ecmult_gen_context_eq(const secp256k1_ecmult_gen_context *a, const secp256k1_ecmult_gen_context *b) {
+    secp256k1_ge a_ge_offset, b_ge_offset;
+    secp256k1_fe a_proj_blind, b_proj_blind;
+    secp256k1_ge_from_storage(&a_ge_offset, &a->ge_offset);
+    secp256k1_ge_from_storage(&b_ge_offset, &b->ge_offset);
+    secp256k1_fe_from_storage(&a_proj_blind, &a->proj_blind);
+    secp256k1_fe_from_storage(&b_proj_blind, &b->proj_blind);
     return a->built == b->built
             && secp256k1_scalar_eq(&a->scalar_offset, &b->scalar_offset)
-            && secp256k1_ge_eq_var(&a->ge_offset, &b->ge_offset)
-            && secp256k1_fe_equal(&a->proj_blind, &b->proj_blind);
+            && secp256k1_ge_eq_var(&a_ge_offset, &b_ge_offset)
+            && secp256k1_fe_equal(&a_proj_blind, &b_proj_blind);
 }
 
 static int context_eq(const secp256k1_context *a, const secp256k1_context *b) {
@@ -5898,20 +5904,20 @@ static void test_ecmult_gen_blind(void) {
     secp256k1_scalar key;
     secp256k1_scalar b;
     unsigned char seed32[32];
-    secp256k1_gej pgej;
-    secp256k1_gej pgej2;
-    secp256k1_ge p;
+    secp256k1_gej pgej, pgej2;
+    secp256k1_ge p, p2;
     secp256k1_ge pge;
     testutil_random_scalar_order_test(&key);
     secp256k1_ecmult_gen_gej(&CTX->ecmult_gen_ctx, &pgej, &key);
     testrand256(seed32);
     b = CTX->ecmult_gen_ctx.scalar_offset;
-    p = CTX->ecmult_gen_ctx.ge_offset;
+    secp256k1_ge_from_storage(&p, &CTX->ecmult_gen_ctx.ge_offset);
     secp256k1_ecmult_gen_blind(&CTX->ecmult_gen_ctx, secp256k1_get_hash_context(CTX), seed32);
     CHECK(!secp256k1_scalar_eq(&b, &CTX->ecmult_gen_ctx.scalar_offset));
     secp256k1_ecmult_gen_gej(&CTX->ecmult_gen_ctx, &pgej2, &key);
     CHECK(!gej_xyz_equals_gej(&pgej, &pgej2));
-    CHECK(!secp256k1_ge_eq_var(&p, &CTX->ecmult_gen_ctx.ge_offset));
+    secp256k1_ge_from_storage(&p2, &CTX->ecmult_gen_ctx.ge_offset);
+    CHECK(!secp256k1_ge_eq_var(&p, &p2));
     secp256k1_ge_set_gej(&pge, &pgej);
     CHECK(secp256k1_gej_eq_ge_var(&pgej2, &pge));
 }
@@ -5922,10 +5928,10 @@ static void test_ecmult_gen_blind_reset(void) {
     secp256k1_ge p1, p2;
     secp256k1_ecmult_gen_blind(&CTX->ecmult_gen_ctx, secp256k1_get_hash_context(CTX), 0);
     b = CTX->ecmult_gen_ctx.scalar_offset;
-    p1 = CTX->ecmult_gen_ctx.ge_offset;
+    secp256k1_ge_from_storage(&p1, &CTX->ecmult_gen_ctx.ge_offset);
     secp256k1_ecmult_gen_blind(&CTX->ecmult_gen_ctx, secp256k1_get_hash_context(CTX), 0);
     CHECK(secp256k1_scalar_eq(&b, &CTX->ecmult_gen_ctx.scalar_offset));
-    p2 = CTX->ecmult_gen_ctx.ge_offset;
+    secp256k1_ge_from_storage(&p2, &CTX->ecmult_gen_ctx.ge_offset);
     CHECK(secp256k1_ge_eq_var(&p1, &p2));
 }
 
