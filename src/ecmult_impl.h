@@ -130,6 +130,7 @@ SECP256K1_INLINE static void secp256k1_ecmult_table_get_ge(secp256k1_ge *r, cons
         *r = pre[(-n-1)/2];
         secp256k1_fe_negate(&(r->y), &(r->y), 1);
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&r->y, 1, 2);
 }
 
 SECP256K1_INLINE static void secp256k1_ecmult_table_get_ge_lambda(secp256k1_ge *r, const secp256k1_ge *pre, const secp256k1_fe *x, int n, int w) {
@@ -140,6 +141,7 @@ SECP256K1_INLINE static void secp256k1_ecmult_table_get_ge_lambda(secp256k1_ge *
         secp256k1_ge_set_xy(r, &x[(-n-1)/2], &pre[(-n-1)/2].y);
         secp256k1_fe_negate(&(r->y), &(r->y), 1);
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&r->y, 1, 2);
 }
 
 SECP256K1_INLINE static void secp256k1_ecmult_table_get_ge_storage(secp256k1_ge *r, const secp256k1_ge_storage *pre, int n, int w) {
@@ -150,6 +152,7 @@ SECP256K1_INLINE static void secp256k1_ecmult_table_get_ge_storage(secp256k1_ge 
         secp256k1_ge_from_storage(r, &pre[(-n-1)/2]);
         secp256k1_fe_negate(&(r->y), &(r->y), 1);
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&r->y, 1, 2);
 }
 
 /** Convert a number to WNAF notation. The number becomes represented by sum(2^i * wnaf[i], i=0..bits),

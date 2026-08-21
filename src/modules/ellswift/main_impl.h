@@ -99,6 +99,8 @@ static void secp256k1_ellswift_xswiftec_frac_var(secp256k1_fe *xn, secp256k1_fe 
         p = g;                                                   /* p = g */
         secp256k1_fe_add(&p, &s);                                /* p = g+s */
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&s, 1, 4);
+    SECP256K1_FE_JOIN_MAGNITUDE(&p, 3, 6);
     secp256k1_fe_mul(&d, &s, &l);                                /* d = s*u^2 */
     secp256k1_fe_mul_int(&d, 3);                                 /* d = 3*s*u^2 */
     secp256k1_fe_sqr(&l, &p);                                    /* l = (g+s)^2 */
@@ -294,6 +296,7 @@ static int secp256k1_ellswift_xswiftec_inv_var(secp256k1_fe *t, const secp256k1_
     if ((c & 5) == 0 || (c & 5) == 5) {
         secp256k1_fe_negate(&m, &m, 1);                 /* m = -w */
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&m, 1, 2);
     /* Now m = {-w if c&5=0 or c&5=5; w otherwise}. */
     secp256k1_fe_mul(&u, &u, c&1 ? &secp256k1_ellswift_c4 : &secp256k1_ellswift_c3);
     /* u = {c4 if c&1=1; c3 otherwise}*u */

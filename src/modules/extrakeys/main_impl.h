@@ -100,6 +100,7 @@ static int secp256k1_extrakeys_ge_even_y(secp256k1_ge *r) {
         secp256k1_fe_negate(&r->y, &r->y, 1);
         y_parity = 1;
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&r->y, 1, 2);
     return y_parity;
 }
 

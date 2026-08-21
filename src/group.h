@@ -232,4 +232,16 @@ static void secp256k1_ge_verify(const secp256k1_ge *a);
 static void secp256k1_gej_verify(const secp256k1_gej *a);
 #define SECP256K1_GEJ_VERIFY(a) secp256k1_gej_verify(a)
 
+/** Join magnitudes of affine group element coordinates at a branch merge point
+ *  (no-op unless VERIFY is enabled). Each coordinate's magnitude is set to the
+ *  maximum of its two possible values from the two branches. */
+static void secp256k1_ge_join_magnitude(secp256k1_ge *a, int xm1, int xm2, int ym1, int ym2);
+#define SECP256K1_GE_JOIN_MAGNITUDE(a, xm1, xm2, ym1, ym2) secp256k1_ge_join_magnitude(a, xm1, xm2, ym1, ym2)
+
+/** Join magnitudes of Jacobian group element coordinates at a branch merge point
+ *  (no-op unless VERIFY is enabled). Each coordinate's magnitude is set to the
+ *  maximum of its two possible values from the two branches. */
+static void secp256k1_gej_join_magnitude(secp256k1_gej *a, int xm1, int xm2, int ym1, int ym2, int zm1, int zm2);
+#define SECP256K1_GEJ_JOIN_MAGNITUDE(a, xm1, xm2, ym1, ym2, zm1, zm2) secp256k1_gej_join_magnitude(a, xm1, xm2, ym1, ym2, zm1, zm2)
+
 #endif /* SECP256K1_GROUP_H */

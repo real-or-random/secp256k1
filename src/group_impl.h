@@ -95,6 +95,17 @@ static void secp256k1_gej_verify(const secp256k1_gej *a) {
     (void)a;
 }
 
+static void secp256k1_ge_join_magnitude(secp256k1_ge *a, int xm1, int xm2, int ym1, int ym2) {
+    SECP256K1_FE_JOIN_MAGNITUDE(&a->x, xm1, xm2);
+    SECP256K1_FE_JOIN_MAGNITUDE(&a->y, ym1, ym2);
+}
+
+static void secp256k1_gej_join_magnitude(secp256k1_gej *a, int xm1, int xm2, int ym1, int ym2, int zm1, int zm2) {
+    SECP256K1_FE_JOIN_MAGNITUDE(&a->x, xm1, xm2);
+    SECP256K1_FE_JOIN_MAGNITUDE(&a->y, ym1, ym2);
+    SECP256K1_FE_JOIN_MAGNITUDE(&a->z, zm1, zm2);
+}
+
 /* Set r to the affine coordinates of Jacobian point (a.x, a.y, 1/zi). */
 static void secp256k1_ge_set_gej_zinv(secp256k1_ge *r, const secp256k1_gej *a, const secp256k1_fe *zi) {
     secp256k1_fe zi2;
@@ -180,18 +191,18 @@ static void secp256k1_ge_set_gej_var(secp256k1_ge *r, secp256k1_gej *a) {
 
     if (secp256k1_gej_is_infinity(a)) {
         secp256k1_ge_set_infinity(r);
-        return;
+    } else {
+        r->infinity = 0;
+        secp256k1_fe_inv_var(&a->z, &a->z);
+        secp256k1_fe_sqr(&z2, &a->z);
+        secp256k1_fe_mul(&z3, &a->z, &z2);
+        secp256k1_fe_mul(&a->x, &a->x, &z2);
+        secp256k1_fe_mul(&a->y, &a->y, &z3);
+        secp256k1_fe_set_int(&a->z, 1);
+        secp256k1_ge_set_xy(r, &a->x, &a->y);
+        SECP256K1_GEJ_VERIFY(a);
     }
-    r->infinity = 0;
-    secp256k1_fe_inv_var(&a->z, &a->z);
-    secp256k1_fe_sqr(&z2, &a->z);
-    secp256k1_fe_mul(&z3, &a->z, &z2);
-    secp256k1_fe_mul(&a->x, &a->x, &z2);
-    secp256k1_fe_mul(&a->y, &a->y, &z3);
-    secp256k1_fe_set_int(&a->z, 1);
-    secp256k1_ge_set_xy(r, &a->x, &a->y);
 
-    SECP256K1_GEJ_VERIFY(a);
     SECP256K1_GE_VERIFY(r);
 }
 
@@ -359,6 +370,7 @@ static int secp256k1_ge_set_xo_var(secp256k1_ge *r, const secp256k1_fe *x, int o
     if (secp256k1_fe_is_odd(&r->y) != odd) {
         secp256k1_fe_negate(&r->y, &r->y, 1);
     }
+    SECP256K1_FE_JOIN_MAGNITUDE(&r->y, 1, 2);
 
     SECP256K1_GE_VERIFY(r);
     return ret;

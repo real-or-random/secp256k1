@@ -348,4 +348,14 @@ static void secp256k1_fe_verify(const secp256k1_fe *a);
 static void secp256k1_fe_verify_magnitude(const secp256k1_fe *a, int m);
 #define SECP256K1_FE_VERIFY_MAGNITUDE(a, m) secp256k1_fe_verify_magnitude(a, m)
 
+/** Set the magnitude of a to the maximum of m1 and m2, after verifying that
+ *  a's magnitude does not exceed either (no-op unless VERIFY is enabled).
+ *
+ *  This is used at merge points of branches that may produce a field element
+ *  with different magnitudes, making the magnitude statically implied as the
+ *  worst case of the two branches.
+ */
+static void secp256k1_fe_join_magnitude(secp256k1_fe *a, int m1, int m2);
+#define SECP256K1_FE_JOIN_MAGNITUDE(a, m1, m2) secp256k1_fe_join_magnitude(a, m1, m2)
+
 #endif /* SECP256K1_FIELD_H */
